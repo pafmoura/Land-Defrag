@@ -1,6 +1,7 @@
 import geopandas as gpd
 import numpy as np
 import random
+import matplotlib.pyplot as plt
 
 caminho_gpkg = 'Madeira.gpkg'
 gdf = gpd.read_file(caminho_gpkg, layer='Parcelas_RAM')
@@ -38,7 +39,7 @@ gdf_parcels = gpd.GeoDataFrame(data, geometry='geometry')
 gdf_parcels.crs = gdf.crs
 
 num_parcelas = len(gdf_parcels)
-num_proprietarios = num_parcelas // 8  # méd de 8 propriedades por proprietário
+num_proprietarios = num_parcelas // 8  # méd de 8 propriedades por proprietário. Encontrei numa tese random
 
 owner_ids = list(range(num_proprietarios))
 
@@ -68,3 +69,38 @@ gdf_parcels['neighbors'] = gdf_parcels['objectid'].map(neighbors_dict)
 
 for parcel in gdf_parcels.itertuples():
     print(f'Parcela: {parcel.objectid}, Vizinhos: {parcel.neighbors}, Proprietário: {parcel.owner_id}')
+
+
+def calculate_aggregation(gdf):
+    aggregations = {}
+    for owner_id in gdf['owner_id'].unique():
+        parcels = gdf[gdf['owner_id'] == owner_id]
+        total_area = parcels['shape_area'].sum()
+        
+        neighbor_count = parcels['neighbors'].apply(
+            lambda x: len([n for n in x if gdf.loc[gdf['objectid'] == n, 'owner_id'].values[0] == owner_id]) 
+                           if isinstance(x, list) else 0
+        ).sum()
+
+        aggregations[owner_id] = total_area + neighbor_count  
+
+    return aggregations
+
+#agregacao_resultados = calculate_aggregation(gdf_parcels)
+
+#sort por agregacao
+#sorted_agregacao = sorted(agregacao_resultados.items(), key=lambda x: x[1], reverse=True)
+#for owner_id, agregacao in sorted_agregacao:
+  #  print(f'Proprietário: {owner_id}, Agregação: {agregacao}')
+
+
+
+def plot_parcels(gdf):
+    gdf.plot(column='owner_id', cmap='viridis', edgecolor='black', legend=True)
+    plt.title('Parcelas por owner')
+    plt.xlabel('Longitude')
+    plt.ylabel('Latitude')
+    plt.show()
+
+
+plot_parcels(gdf_parcels)
