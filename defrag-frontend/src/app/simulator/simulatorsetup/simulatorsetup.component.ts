@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { LeafletModule } from '@bluehalo/ngx-leaflet';
 import * as Leaflet from 'leaflet';
+import { BackendApiService } from '../../services/backend-api.service';
 
 
 @Component({
@@ -12,7 +13,7 @@ import * as Leaflet from 'leaflet';
 })
 export class SimulatorsetupComponent {
 
-  constructor() {
+  constructor(private backendApiService: BackendApiService) {
 
    }
 
@@ -73,6 +74,20 @@ export class SimulatorsetupComponent {
   onMapReady(map: Leaflet.Map) {
     this.mapInstance = map;
     this.addPolygonToMap();
+  }
+
+
+  getLoadedLands(){
+    console.log('Loaded Lands');
+    this.backendApiService.simulate({default_file: 'Madeira.gpkg', distribuition_name: 'uniform', owners_average_land: 8}).subscribe(
+      (response) => {
+        console.log(response);
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
+
   }
 
 
