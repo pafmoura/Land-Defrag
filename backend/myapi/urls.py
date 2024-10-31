@@ -5,4 +5,5 @@ from myapi import views
 
 urlpatterns = [
     path("test", views.test_connection, name="test_connection"),
+    path("simulate", views.simulate, name="simulate"),
 ]
