@@ -5,7 +5,7 @@ from myapi.utils.geopandas_wrapper import add_neighbours
 def preprocess_geopandas(gdf, name, owners_average_land):
     functional_gdf = gdf.copy()
 
-    generator = Population_Generator().create_generator(
+    generator = Population_Generator.create_generator(
         name=name,
         num_rows_geopandas=len(functional_gdf),
         owners_average_land=owners_average_land,
