@@ -1,4 +1,4 @@
-from myapi.utils.classes.populate_classes import Population_Generator
+from myapi.utils.utils import preprocess_geopandas
 
 import geopandas as gpd
 
@@ -21,17 +21,11 @@ def simulate(request):
     )  # Dummy Geopandas, não mudar nome de variável
 
     try:
-        name = request.POST["defrag_algorithm"]
+        name = request.POST["distribuition_name"]
         owners_average_land = request.POST["owners_average_land"]
     except KeyError:
         return Response(status=status.HTTP_400_BAD_REQUEST, data={"": "Bad Request"})
 
-    generator = Population_Generator.create_generator(
-        name=name,
-        num_rows_geopandas=len(gdf),
-        owners_average_land=owners_average_land,
-    )
-
-    gdf["OWNER_ID"] = generator.populate()
+    gdf = preprocess_geopandas(gdf, name=name, owners_average_land=owners_average_land)
 
     return Response(status=status.HTTP_200_OK, data={"": "Alive"})

@@ -70,11 +70,3 @@ class Uniform_Generator(Population_Generator):
         return np.round(
             np.random.uniform(low=0, high=num_owners, size=self.num_rows_geopandas)
         ).astype(int)
-
-
-# Example usage:
-generator = Population_Generator.create_generator(
-    name="Poisson", num_rows_geopandas=100, owners_average_land=10
-)
-
-print(generator.populate())
