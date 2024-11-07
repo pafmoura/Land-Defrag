@@ -6,7 +6,7 @@ from django.core.files.storage import FileSystemStorage
 def read_geopandas(file_name):
     fs = FileSystemStorage()
     return gpd.read_file(
-        f"{settings.MEDIA_ROOT}{fs.url(file_name)}", layer="Parcelas_RAM"
+        f"{settings.MEDIA_ROOT}{fs.url(file_name)}", layer="layer"
     )
 
 
