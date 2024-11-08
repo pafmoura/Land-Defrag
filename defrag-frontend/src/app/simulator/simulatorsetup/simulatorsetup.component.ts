@@ -4,11 +4,13 @@ import * as Leaflet from 'leaflet';
 import { BackendApiService } from '../../services/backend-api.service';
 import proj4 from 'proj4';
 import 'proj4leaflet';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-simulatorsetup',
   standalone: true,
-  imports: [LeafletModule],
+  imports: [LeafletModule, CommonModule, FormsModule],
   templateUrl: './simulatorsetup.component.html',
   styleUrl: './simulatorsetup.component.css'
 })
@@ -18,6 +20,13 @@ export class SimulatorsetupComponent implements OnInit {
 
   epsg3763Projection = '+proj=tmerc +lat_0=39.6682583333333 +lon_0=-8.13310833333333 +k=1 +x_0=0 +y_0=0 +datum=ETRS89 +units=m +no_defs';
 
+
+  distributionName: string = 'uniform';
+  ownersAverageLand: number = 8;
+  algorithm: string = 'Maximização de Agregação';
+  maxAreaDifference: number = 5500;
+
+
   options = {
     layers: [
       Leaflet.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
@@ -25,8 +34,8 @@ export class SimulatorsetupComponent implements OnInit {
         attribution: '...'
       })
     ],
-    zoom: 14,
-    center: Leaflet.latLng(32.7607, -16.9595),
+    zoom: 5,
+    center: Leaflet.latLng(39.3999, -8.2245),
   };
 
   constructor(private backendApiService: BackendApiService) {
@@ -45,6 +54,30 @@ export class SimulatorsetupComponent implements OnInit {
   convertTM06ToLatLng(x: number, y: number): [number, number] {
     const result = proj4('EPSG:3763', 'WGS84', [x, y]);
     return [result[1], result[0]]; 
+  }
+
+  numberOfLands : any = 'Por Apurar';
+  totalArea : any = 'Por Apurar';
+
+  getNumberOfLands() {
+    return this.polygonsLayer.getLayers().length;
+  }
+
+  getTotalArea() {
+    let totalArea = 0;
+  
+    this.GeoJSONData.features.forEach((feature: any) => {
+      if (feature.properties?.Shape_Area) {
+        totalArea += feature.properties.Shape_Area;
+      }
+    });
+  
+    totalArea = totalArea / 1000;
+  
+    totalArea = parseFloat(totalArea.toFixed(2));
+  
+    console.log(totalArea);
+    return totalArea;
   }
 
   addPolygonsFromGeoJSON(geoJsonData: any) {
@@ -89,28 +122,36 @@ export class SimulatorsetupComponent implements OnInit {
 
       if (this.polygonsLayer.getLayers().length > 0) {
         const bounds = this.polygonsLayer.getBounds();
-        this.mapInstance.fitBounds(bounds, {
-          padding: [50, 50] 
+        this.mapInstance.flyToBounds(bounds, {
+          padding: [50, 50],  
+          duration: 1.5,  
+         
         });
       }
     } catch (error) {
       console.error('Erro ao processar GeoJSON:', error);
     }
+
   }
 
   circumference = 0;
   dashOffset = 0;
   progress = 0;
 
+GeoJSONData: any = {};
+
   getLoadedLands() {
     this.backendApiService.simulate({
       default_file: 'portalegre.gpkg',
-      distribuition_name: 'uniform',
-      owners_average_land: 8
+      distribuition_name: this.distributionName,
+      owners_average_land: this.ownersAverageLand
     }).subscribe({
       next: (response) => {
         console.log(response);
+        this.GeoJSONData = response;
         this.addPolygonsFromGeoJSON(response);
+        this.numberOfLands = this.getNumberOfLands();
+        this.totalArea = this.getTotalArea();
       },
       error: (error) => {
         console.error('Erro ao carregar dados:', error);

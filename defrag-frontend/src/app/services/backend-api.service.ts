@@ -19,6 +19,9 @@ export class BackendApiService {
     );
   }
 
+
+  
+
   simulate(data: { default_file: string; distribuition_name: string; owners_average_land: number }): Observable<any> {
     const formData = new FormData();
     formData.append('default_file', data.default_file);

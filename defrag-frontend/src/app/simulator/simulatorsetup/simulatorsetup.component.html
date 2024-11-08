@@ -41,11 +41,11 @@ https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css
                     <div class="flex gap-4 border-b border-white pb-4">
                         <div class="flex-1">
                             <p class="text-sm text-[#C6DCFC]">Número de Parcelas</p>
-                            <p class="text-2xl text-white font-bold">55002</p>
+                            <p class="text-2xl text-white font-bold">{{ numberOfLands }}</p>
                         </div>
                         <div class="flex-1">
                             <p class="text-sm text-[#C6DCFC]">Área total</p>
-                            <p class="text-2xl font-bold">35000km2</p>
+                            <p class="text-2xl font-bold">{{ totalArea }}</p>
                         </div>
                     </div>
                     <div class="mt-4">
@@ -86,69 +86,45 @@ https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css
 
             
 
-            <div class="flex-[2]   ">
-
+            <div class="flex-[2]">
                 <div class="bg-white rounded-lg p-6 shadow-lg h-[67%] mb-8">
-                <h2 class="text-3xl font-bold font-dm-sans text mb-6 ">Parametrização</h2>
-                <div class="space-y-16">
-                    
+                  <h2 class="text-3xl font-bold font-dm-sans text mb-6">Parametrização</h2>
+                  <div class="space-y-16">
                     <div class="flex gap-16">
-                        
-                        <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Distribuição a Utilizar</label>
-                            <select class="w-full p-2 border rounded-md h-[70%]">
-                                <option>Normal</option>
-                                <option>Uniforme</option>
-                                </select>
-                        </div>
-
-
-                        <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Média de Terrenos por Owner</label>
-                            <input type="text" value="8" class="w-full h-[70%] p-2 border rounded-md">
-                        </div>
-                        
+                      <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Distribuição a Utilizar</label>
+                        <select class="w-full p-2 border rounded-md h-[70%]" [(ngModel)]="distributionName">
+                          <option value="poisson" >Poisson</option>
+                          <option value="uniform" >Uniforme</option>
+                        </select>
+                      </div>
+                      <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Média de Terrenos por Owner</label>
+                        <input type="text" [(ngModel)]="ownersAverageLand" class="w-full h-[70%] p-2 border rounded-md">
+                      </div>
                     </div>
-
-                    
-
-                    
-           
-
-
                     <div class="flex gap-16">
-                        <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Algoritmo</label>
-                            <select class="w-full p-2 border rounded-md h-[70%]">
-                                <option>Maximização de Agregação</option>
-                                <option>Valores Iguais</option>
-                                <option>Algoritmo Médio</option>
-                            </select>
-                        </div>
-                        <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Diferença de área aceitável (metros)</label>
-                            <input type="text" value="5500" class="w-full p-2 h-[70%] border rounded-md">
-                        </div>
+                      <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Algoritmo</label>
+                        <select class="w-full p-2 border rounded-md h-[70%]" >
+                          <option>Maximização de Agregação</option>
+                          <option>Valores Iguais</option>
+                          <option>Algoritmo Médio</option>
+                        </select>
+                      </div>
+                      <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Diferença de área aceitável (metros)</label>
+                        <input type="text" class="w-full p-2 h-[70%] border rounded-md">
+                      </div>
                     </div>
-
-                    <div class="flex gap-16">
-                       
-                       
-                    </div>
-
-                    
+                  </div>
                 </div>
-                
-            </div>
-
-            <button class="w-full mt-4 py-3 bg-[#719460] text-white rounded-lg hover:bg-[#719450]" (click)="getLoadedLands()">Iniciar Simulação</button>
-               
-               
+                <button class="w-full mt-4 py-3 bg-[#719460] text-white rounded-lg hover:bg-[#719450]" (click)="getLoadedLands()">Iniciar Simulação</button>
+              </div>
               
-        
+              
 
-            </div>
-
+    
         
 
             
