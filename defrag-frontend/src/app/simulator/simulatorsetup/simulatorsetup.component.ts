@@ -34,7 +34,7 @@ export class SimulatorsetupComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.getLoadedLands();
+   // this.getLoadedLands();
   }
 
   onMapReady(map: Leaflet.Map) {
