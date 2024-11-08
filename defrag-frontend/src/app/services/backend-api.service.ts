@@ -13,6 +13,8 @@ export class BackendApiService {
 
   constructor(private http: HttpClient) { }
 
+
+  
   testConnection(): Observable<any> {
     return this.http.get(`${this.baseUrl}/test_connection`).pipe(
       catchError(this.handleError)

@@ -27,6 +27,8 @@ export class SimulatorsetupComponent implements OnInit {
   maxAreaDifference: number = 5500;
 
 
+  isSimulationLoaded = false;
+
   options = {
     layers: [
       Leaflet.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
@@ -152,6 +154,7 @@ GeoJSONData: any = {};
         this.addPolygonsFromGeoJSON(response);
         this.numberOfLands = this.getNumberOfLands();
         this.totalArea = this.getTotalArea();
+        this.isSimulationLoaded = true;
       },
       error: (error) => {
         console.error('Erro ao carregar dados:', error);
