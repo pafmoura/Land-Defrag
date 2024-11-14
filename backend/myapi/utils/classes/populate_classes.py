@@ -13,6 +13,7 @@ class Population_Generator(ABC):
 
     @classmethod
     def create_generator(cls, name, *args, **kwargs):
+        np.random.seed(42)
         match name:
             case "Poisson":
                 return Poisson_Generator(name, *args, **kwargs)

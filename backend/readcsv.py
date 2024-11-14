@@ -83,11 +83,7 @@ def calculate_aggregation(gdf):
         parcels = gdf[gdf["owner_id"] == owner_id]
         total_area = parcels["shape_area"].sum()
 
-        neighbor_count = (
-            parcels["neighbors"]
-            .apply(
-                lambda x: (
-                    len(
+        neighbor_count = (parcels["neighbors"].apply(lambda x: (len(
                         [
                             n
                             for n in x
