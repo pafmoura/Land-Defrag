@@ -1,0 +1,57 @@
+<div *ngIf="isOpen" class="fixed inset-0 z-[9999] flex items-center justify-center">
+    <div class="absolute inset-0 bg-black/50" (click)="close.emit()"></div>
+  
+    <!-- Modal Container -->
+    <div class="relative z-10 bg-white p-6 rounded-lg w-[calc(100vw-7%)] h-[calc(100vh-10%)] shadow-xl overflow-hidden">
+      <h2 class="text-xl font-bold mb-4">Estatísticas</h2>
+      
+      <div class="mb-4 flex space-x-4 border-b">
+        <button
+          class="py-2 px-4 text-sm font-semibold text-gray-700 hover:text-blue-500 border-b-2"
+          [ngClass]="{'border-blue-500': selectedTab === 'chart1'}"
+          (click)="selectTab('chart1')">
+Terrenos por Owner        </button>
+        <button
+          class="py-2 px-4 text-sm font-semibold text-gray-700 hover:text-blue-500 border-b-2"
+          [ngClass]="{'border-blue-500': selectedTab === 'chart2'}"
+          (click)="selectTab('chart2')">
+          Gráfico 2
+        </button>
+        <button
+          class="py-2 px-4 text-sm font-semibold text-gray-700 hover:text-blue-500 border-b-2"
+          [ngClass]="{'border-blue-500': selectedTab === 'chart3'}"
+          (click)="selectTab('chart3')">
+          Gráfico 3
+        </button>
+      </div>
+  
+      <div *ngIf="selectedTab === 'chart1'" class="w-full flex flex-col justify-center  h-[calc(100vh-40%)] items-center">
+        <h3 class="text-lg font-semibold mb-4 mt-4">Terrenos por Owner | Antes e Depois</h3>
+          <canvas
+          baseChart
+          [datasets]="barChartData.datasets"
+          [labels]="barChartLabels"
+          [options]="barChartOptions"
+          [legend]="true"
+          [type]="'bar'"
+          class="w-full h-[70vh]">
+        </canvas>
+      </div>
+  
+      <div *ngIf="selectedTab === 'chart2'" class="w-full flex justify-center">
+        <p>Gráfico 2</p>
+      </div>
+  
+      <div *ngIf="selectedTab === 'chart3'" class="w-full flex justify-center">
+        <p>Gráfico 3</p>
+      </div>
+  
+      <!-- Close Button -->
+      <button 
+        class="mt-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
+        (click)="close.emit()">
+        Fechar
+      </button>
+    </div>
+  </div>
+  
