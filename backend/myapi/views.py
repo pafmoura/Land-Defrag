@@ -31,9 +31,10 @@ def simulate(request):
     if check_geopackage_status(generated_file_name):
         gdf = read_geopandas(generated_file_name)
         convert_types(gdf)
-    else:
+    else:  
         folder = "defaults/" if file is None else "uploads/"
         gdf = read_geopandas(folder + file_name, file)
+        save_file(gdf, folder + file_name)
         gdf = preprocess_geopandas(gdf, name=name, owners_average_land=owners_average_land)
         save_file(gdf, generated_file_name)
 
