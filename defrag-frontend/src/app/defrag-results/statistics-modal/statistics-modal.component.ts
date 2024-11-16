@@ -5,6 +5,12 @@ import { BaseChartDirective } from 'ng2-charts';
 import { BarController, ChartData, ChartOptions } from 'chart.js';
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'; 
 import { BackendApiService } from '../../services/backend-api.service';
+import * as d3 from 'd3';
+import * as Leaflet from 'leaflet';
+import proj4 from 'proj4';
+import { LeafletModule } from '@bluehalo/ngx-leaflet';
+import { FormsModule } from '@angular/forms';
+import { GeoJsonUtilsService } from '../../services/geo-json-utils.service';
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, BarController); 
 
@@ -12,7 +18,7 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale,
 @Component({
   selector: 'app-statistics-modal',
   standalone: true,
-  imports: [CommonModule, BaseChartDirective],
+  imports: [CommonModule, BaseChartDirective, LeafletModule, FormsModule],
   templateUrl: './statistics-modal.component.html',
   styleUrls: ['./statistics-modal.component.css'],
 })
@@ -23,11 +29,16 @@ export class StatisticsModalComponent implements OnInit {
   resultsData: any = null;
   initialSimulation: any = null;
 
-  constructor(private statisticsService: StatisticsService, private backendApiService : BackendApiService) {}
+  constructor(private statisticsService: StatisticsService, private backendApiService : BackendApiService, private geoJsonUtilsService: GeoJsonUtilsService,) {}
+  ownersList: string[] = [];
+  filteredOwner: string | null = null;
+  filteredLayer: Leaflet.FeatureGroup = new Leaflet.FeatureGroup();
+  mapInstance!: Leaflet.Map;
+  polygonsLayer: Leaflet.FeatureGroup = new Leaflet.FeatureGroup();
 
   ngOnInit() {
     this.resultsData = this.backendApiService.defrag_result;
-    this.initialSimulation = this.backendApiService.initial_simulation
+    this.initialSimulation = this.backendApiService.initial_simulation;
 
     console.log('Results Data:', this.resultsData);
     console.log('Initial Simulation:', this.initialSimulation);
@@ -38,25 +49,99 @@ export class StatisticsModalComponent implements OnInit {
         this.initialSimulation
       ),
     );
+
+    const ownerSet = new Set<string>();
+    this.initialSimulation.features.forEach((feature: any) => {
+      const ownerId = feature.properties?.OWNER_ID;
+      if (ownerId) {
+        ownerSet.add(ownerId);
+      }
+    });
+    this.ownersList = Array.from(ownerSet);
+
+    //sort
+    this.ownersList.sort((a, b) => {
+      return Number(a) - Number(b);
+    });
+
     this.updateBarChartData();
   }
 
-  generateBasicStatistics() {
-    const basicStatistics = this.statisticsService.generateBasicStatistics(
-      this.resultsData,
-      this.initialSimulation
-    );
-    console.log('Basic Statistics:', basicStatistics);
+  mapOptions = {
+    layers: [
+      Leaflet.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+        {
+          maxZoom: 18,
+          attribution: '...',
+        }
+      ),
+    ],
+    zoom: 5,
+    center: Leaflet.latLng(39.3999, -8.2245),
+
+  };
+
+  onMapReady(map: Leaflet.Map) {
+    this.mapInstance = map;
+    this.polygonsLayer.addTo(map);
+    this.filteredLayer.addTo(map); 
+
+
+    if (this.resultsData && this.resultsData.gdf) {
+      const filteredPolygons = this.filterPolygonsByOwner(this.resultsData.gdf, this.filteredOwner);
+      this.geoJsonUtilsService.addPolygonsFromGeoJSON(this.mapInstance, this.polygonsLayer, filteredPolygons);
+    }
+  }
+
+  private filterPolygonsByOwner(geoJsonData: any, owner: string | null): any {
+    if (!geoJsonData || !owner) {
+      console.warn('Dados do GeoJSON não fornecidos.');
+      return geoJsonData; 
+    }
+
+    const filteredFeatures = geoJsonData.features.filter((feature: any) => {
+      return feature.properties?.OWNER_ID === Number(owner);
+    });
+
+    return { ...geoJsonData, features: filteredFeatures };
   }
 
 
+  onOwnerChange(ownerId: string) {
+    console.log('Owner Changed:', ownerId);
+    this.filteredOwner = ownerId;
+    this.updateMapWithFilteredData();
+  }
 
-
-
-
-
-
-
+  updateMapWithFilteredData() {
+    if (!this.mapInstance || !this.resultsData) return;
+  
+    this.polygonsLayer.clearLayers();
+    this.filteredLayer.clearLayers();
+    
+    const filteredGeoJson = this.filterPolygonsByOwner(this.resultsData.gdf, this.filteredOwner);
+  
+    if (filteredGeoJson.features.length > 0) {
+      this.geoJsonUtilsService.addPolygonsFromGeoJSON(this.mapInstance, this.filteredLayer, filteredGeoJson);
+    }
+  
+    this.mapInstance.invalidateSize();
+  
+    if (this.filteredLayer.getLayers().length > 0) {
+      try {
+        this.mapInstance.fitBounds(this.filteredLayer.getBounds());
+      } catch (e) {
+        console.error('Erro ao ajustar os limites do mapa:', e);
+      }
+    }
+  }
+  
+  
+  
+  
+  
+  
 
   barChartOptions: ChartOptions = {
     responsive: true,
@@ -69,6 +154,7 @@ export class StatisticsModalComponent implements OnInit {
       }
     }
   };
+
   barChartLabels: string[] = []; 
   barChartData: ChartData<'bar'> = {
     labels: this.barChartLabels,
@@ -88,49 +174,42 @@ export class StatisticsModalComponent implements OnInit {
     ]
   };
 
-
   updateBarChartData() {
     const ownerPropertyCount: { [key: string]: { before: number; after: number } } = {};
-  
+
     this.initialSimulation.features.forEach((feature: any) => {
       const ownerId = feature.properties?.OWNER_ID;
-  
+
       if (!ownerPropertyCount[ownerId]) {
         ownerPropertyCount[ownerId] = { before: 0, after: 0 };
       }
-  
+
       ownerPropertyCount[ownerId].before++;
     });
 
     this.resultsData.gdf.features.forEach((feature: any) => {
       const ownerId = feature.properties?.OWNER_ID;
-  
+
       if (!ownerPropertyCount[ownerId]) {
         ownerPropertyCount[ownerId] = { before: 0, after: 0 };
       }
-  
+
       ownerPropertyCount[ownerId].after++;
     });
-  
 
-  
     this.barChartLabels = Object.keys(ownerPropertyCount);
-    this.barChartData.datasets[0].data = Object.values(ownerPropertyCount).map(o => o.before); // Contagem antes
-    this.barChartData.datasets[1].data = Object.values(ownerPropertyCount).map(o => o.after); // Contagem depois
-  
-console.log('before', this.barChartData.datasets[0].data);
-console.log('after', this.barChartData.datasets[1].data);
+    this.barChartData.datasets[0].data = Object.values(ownerPropertyCount).map(o => o.before); 
+    this.barChartData.datasets[1].data = Object.values(ownerPropertyCount).map(o => o.after); 
+
+    console.log('before', this.barChartData.datasets[0].data);
+    console.log('after', this.barChartData.datasets[1].data);
 
     const sumBefore = Object.values(ownerPropertyCount).reduce((acc, o) => acc + o.before, 0);
     const sumAfter = Object.values(ownerPropertyCount).reduce((acc, o) => acc + o.after, 0);
-  
   }
-  
+
   selectedTab = 'chart1';
   selectTab(tab: string) {
     this.selectedTab = tab;
   }
-
 }
-
-

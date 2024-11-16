@@ -63,14 +63,12 @@ export class GeoJsonUtilsService {
       new Set(gdf.features.map((feature: any) => feature.properties.OWNER_ID as string))
     );
 
-    // Gera cores apenas para novos proprietários
     const newOwners = uniqueOwners.filter(ownerId => !this.ownerColorMap.has(ownerId));
     if (newOwners.length > 0) {
       const newColors = this.generateColorPalette(newOwners.length);
       newOwners.forEach((ownerId, index) => {
         this.ownerColorMap.set(ownerId, newColors[index]);
       });
-      // Salva as novas cores no storage
       this.saveColorsToStorage();
     }
 
@@ -111,7 +109,7 @@ export class GeoJsonUtilsService {
         const bounds = layerGroup.getBounds();
         map.flyToBounds(bounds, {
           padding: [50, 50],
-          duration: 1.5
+          duration: 0.5
         });
       }
     } catch (error) {

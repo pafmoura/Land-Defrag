@@ -9,12 +9,12 @@
           class="py-2 px-4 text-sm font-semibold text-gray-700 hover:text-blue-500 border-b-2"
           [ngClass]="{'border-blue-500': selectedTab === 'chart1'}"
           (click)="selectTab('chart1')">
-Terrenos por Owner        </button>
+Número de Terrenos por Owner        </button>
         <button
           class="py-2 px-4 text-sm font-semibold text-gray-700 hover:text-blue-500 border-b-2"
           [ngClass]="{'border-blue-500': selectedTab === 'chart2'}"
           (click)="selectTab('chart2')">
-          Gráfico 2
+          Mapa de Terrenos por Owner
         </button>
         <button
           class="py-2 px-4 text-sm font-semibold text-gray-700 hover:text-blue-500 border-b-2"
@@ -38,14 +38,19 @@ Terrenos por Owner        </button>
       </div>
   
       <div *ngIf="selectedTab === 'chart2'" class="w-full flex justify-center">
-        <p>Gráfico 2</p>
+        <div class="mb-4">
+          <label for="ownerSelect" class="block text-sm font-medium text-gray-700">Selecione um proprietário:</label>
+          <select [(ngModel)]="filteredOwner" (ngModelChange)="onOwnerChange($event)" class="mt-1 block w-full p-2 border mr-2">
+            <option *ngFor="let owner of ownersList" [value]="owner">{{ owner }}</option>
+          </select>
+        </div>
+        <div class="w-full h-[70vh] mx-2" leaflet [leafletOptions]="mapOptions" (leafletMapReady)="onMapReady($event)">
+        </div>
       </div>
-  
       <div *ngIf="selectedTab === 'chart3'" class="w-full flex justify-center">
         <p>Gráfico 3</p>
       </div>
   
-      <!-- Close Button -->
       <button 
         class="mt-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
         (click)="close.emit()">
