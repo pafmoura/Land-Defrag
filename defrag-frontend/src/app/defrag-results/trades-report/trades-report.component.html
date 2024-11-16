@@ -1,25 +1,66 @@
-<div class="p-6">
-    <h2 class="text-2xl font-bold mb-4">Relatório de Trocas</h2>
-    
-    <div class="overflow-x-auto">
-      <table class="table-auto w-full border border-gray-200 text-left">
-        <thead>
-          <tr class="bg-gray-100">
-            <th class="px-4 py-2 border-b border-gray-300">ID da Parcela</th>
-            <th class="px-4 py-2 border-b border-gray-300">Área</th>
-            <th class="px-4 py-2 border-b border-gray-300">Owner Antigo</th>
-            <th class="px-4 py-2 border-b border-gray-300">Owner Novo</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let trade of tradesData" class="odd:bg-white even:bg-gray-50">
-            <td class="px-4 py-2 border-b border-gray-300">{{ trade.id }}</td>
-            <td class="px-4 py-2 border-b border-gray-300">{{ trade.area }}</td>
-            <td class="px-4 py-2 border-b border-gray-300">{{ trade.oldOwner }}</td>
-            <td class="px-4 py-2 border-b border-gray-300">{{ trade.newOwner }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+<div class="overflow-x-auto max-h-full">
+    <table class="table-auto w-full border border-gray-200 text-left">
+      <thead class="bg-[#719460] text-white sticky top-0 z-10">
+        <tr>
+          <th
+            class="px-4 py-2 border-b border-gray-300 cursor-pointer"
+            (click)="sortTable('id')"
+          >
+            ID da Parcela
+            <span *ngIf="activeSort === 'id'">
+              <span *ngIf="sortDirection['id']">▲</span>
+              <span *ngIf="!sortDirection['id']">▼</span>
+            </span>
+          </th>
+          <th
+            class="px-4 py-2 border-b border-gray-300 cursor-pointer"
+            (click)="sortTable('area')"
+          >
+            Área
+            <span *ngIf="activeSort === 'area'">
+              <span *ngIf="sortDirection['area']">▲</span>
+              <span *ngIf="!sortDirection['area']">▼</span>
+            </span>
+          </th>
+          <th
+            class="px-4 py-2 border-b border-gray-300 cursor-pointer"
+            (click)="sortTable('owners')"
+          >
+            Troca de Owner
+            <span *ngIf="activeSort === 'owners'">
+              <span *ngIf="sortDirection['owners']">▲</span>
+              <span *ngIf="!sortDirection['owners']">▼</span>
+            </span>
+          </th>
+          <th
+            class="px-4 py-2 border-b border-gray-300 cursor-pointer"
+            (click)="sortTable('newOwner')"
+          >
+            Owner Atual
+            <span *ngIf="activeSort === 'newOwner'">
+              <span *ngIf="sortDirection['newOwner']">▲</span>
+              <span *ngIf="!sortDirection['newOwner']">▼</span>
+            </span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let trade of tradesData" class="odd:bg-white even:bg-gray-50">
+          <td class="px-4 py-2 border-b border-gray-300">{{ trade.id }}</td>
+          <td class="px-4 py-2 border-b border-gray-300">{{ trade.area }}</td>
+          <td class="px-4 py-2 border-b border-gray-300">
+            <ng-container *ngIf="trade.oldOwner !== trade.newOwner; else noTrade">
+              <span class="text-blue-600 font-medium">{{ trade.oldOwner }}</span>
+              <span class="text-gray-500">→</span>
+              <span class="text-green-600 font-medium">{{ trade.newOwner }}</span>
+            </ng-container>
+            <ng-template #noTrade>
+              <span class="text-gray-500">Sem troca realizada</span>
+            </ng-template>
+          </td>
+          <td class="px-4 py-2 border-b border-gray-300">{{ trade.newOwner }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
   

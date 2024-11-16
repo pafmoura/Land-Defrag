@@ -1,0 +1,95 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Desfragmentação</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+<link href="
+https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css
+
+
+
+" rel="stylesheet"></head>
+<body class="bg-gray-50  ">
+
+
+  
+    <header class="bg-gray-200 shadow-sm p-4">
+        <div class="container mx-auto  flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="assets/utils/logo.png" alt="ISCTE Logo" class="h-8">
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="p-2 rounded-full bg-white hover:bg-gray-100">
+                    <svg class="w-6 h-6 fill-current text-[#719460]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+                <button class="p-2 rounded-full bg-white hover:bg-gray-100" [routerLink]="'/results/map'">
+                    <svg class="w-6 h-6 fill-current text-[#719460]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-16 pt-8 ">
+        <h1 class="text-3xl font-bold mb-8">Análise de Desfragmentação</h1>
+
+        <div class="flex gap-52">
+            <div class="flex-1 max-w-lg relative ">
+                <div class="bg-[#719460] text-white rounded-xl p-12 pb-16 relative z-10 shadow-xl">
+                    <div class="flex gap-4 border-b border-white pb-4">
+                        <div class="flex-1">
+                            <p class="text-sm text-[#C6DCFC]">Número de Parcelas</p>
+                            <p class="text-2xl text-white font-bold">456546</p>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm text-[#C6DCFC]">Área total</p>
+                            <p class="text-2xl font-bold">456546</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-sm text-[#C6DCFC]">Valor Estimado</p>
+                        <p class="text-2xl font-bold">€300,290.00</p>
+                    </div>
+                    <div class="absolute -bottom-44 left-1/2 -translate-x-1/2 w-64 h-64 overflow-hidden border-white drop-shadow-2xl z-10">
+                        <img src="https://www.onxmaps.com/wp-content/uploads/sites/15/2022/02/BCTEST-CROP-5.png" alt="Map Preview" class="w-full h-full object-cover">
+                    </div>
+                </div>
+                
+                
+
+               
+
+                
+            </div>
+
+            
+
+            <div class="flex-[2] h-[70vh] max-h-[70vh]  bg-white shadow-md rounded-lg hover:shadow-xl transition ">
+                
+<app-trades-report></app-trades-report>
+
+
+
+              </div>
+              
+              
+
+    
+        
+
+            
+            
+        </div>
+
+     
+     
+
+      
+
+    </main>
+</body>

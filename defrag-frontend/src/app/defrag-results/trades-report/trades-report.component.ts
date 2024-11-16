@@ -18,6 +18,14 @@ export class TradesReportComponent implements OnInit {
     newOwner: string;
   }> = [];
 
+  sortDirection: { [key: string]: boolean } = {
+    id: true,
+    area: true,
+    oldOwner: true,
+    newOwner: true,
+    owners: true, 
+  };
+
   private initialKey = 'initial_simulation'; 
   private resultsKey = 'results_data'; 
 
@@ -34,12 +42,9 @@ export class TradesReportComponent implements OnInit {
     const initialData = this.storageService.getItem<any>(this.initialKey);
     const resultsData = this.storageService.getItem<any>(this.resultsKey);
 
-    console.log('Initial Data:', initialData);  
     if (initialData && resultsData) {
-      console.log('Dados carregados do localStorage.');
       this.generateTradesData(initialData, resultsData);
     } else {
-      console.log('Buscando dados da API...');
       this.fetchDataFromAPI();
     }
   }
@@ -49,13 +54,9 @@ export class TradesReportComponent implements OnInit {
     const resultsData = this.backendApiService.defrag_result;
 
     if (initialData && resultsData) {
-      console.log('Dados carregados da API.');
       this.storageService.setItem(this.initialKey, initialData);
       this.storageService.setItem(this.resultsKey, resultsData);
-
       this.generateTradesData(initialData, resultsData);
-    } else {
-      console.error('Erro ao buscar dados do BackendApiService.');
     }
   }
 
@@ -68,10 +69,43 @@ export class TradesReportComponent implements OnInit {
     }));
   }
 
+  activeSort: string = '';
   findOldOwner(initialData: any, parcelId: string): string {
     const matchingFeature = initialData.features.find(
       (feature: any) => feature.properties?.PAR_ID === parcelId
     );
     return matchingFeature?.properties?.OWNER_ID || '0';
   }
-}
+
+  sortTable(column: string): void {
+    this.activeSort = column;
+  
+    const direction = this.sortDirection[column];
+    this.tradesData = [...this.tradesData].sort((a, b) => {
+      if (column === 'owners') {
+        const ownerA = a.oldOwner === a.newOwner ? '' : `${a.oldOwner}→${a.newOwner}`;
+        const ownerB = b.oldOwner === b.newOwner ? '' : `${b.oldOwner}→${b.newOwner}`;
+        return direction
+          ? ownerA.localeCompare(ownerB)
+          : ownerB.localeCompare(ownerA);
+      }
+  
+      const aValue = a[column as keyof typeof a];
+      const bValue = b[column as keyof typeof b];
+  
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return direction ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      }
+  
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return direction ? aValue - bValue : bValue - aValue;
+      }
+  
+      return 0; 
+    });
+  
+    this.sortDirection[column] = !direction;
+  }
+  
+  
+}  

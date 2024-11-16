@@ -8,12 +8,13 @@ import { StorageService } from '../../services/storage-service.service';
 import { GeoJsonUtilsService } from '../../services/geo-json-utils.service';
 import { CommonModule } from '@angular/common';
 import { StatisticsModalComponent } from '../statistics-modal/statistics-modal.component';
+import { RouterModule } from '@angular/router';
 
 
 @Component({
   selector: 'app-results-map',
   standalone: true,
-  imports: [LeafletModule, CommonModule, StatisticsModalComponent],
+  imports: [LeafletModule, CommonModule, StatisticsModalComponent, RouterModule],
   templateUrl: './results-map.component.html',
   styleUrl: './results-map.component.css'
 })
