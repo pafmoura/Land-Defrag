@@ -3,10 +3,10 @@ import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { StatisticsService } from '../../services/statistics.service';
 import { BaseChartDirective } from 'ng2-charts';
 import { BarController, ChartData, ChartOptions } from 'chart.js';
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'; // Importando todos os módulos necessários do Chart.js
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'; 
 import { BackendApiService } from '../../services/backend-api.service';
 
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, BarController); // Adicionando BarController
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, BarController); 
 
 
 @Component({

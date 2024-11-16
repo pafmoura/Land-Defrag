@@ -1,0 +1,25 @@
+<div class="p-6">
+    <h2 class="text-2xl font-bold mb-4">Relatório de Trocas</h2>
+    
+    <div class="overflow-x-auto">
+      <table class="table-auto w-full border border-gray-200 text-left">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="px-4 py-2 border-b border-gray-300">ID da Parcela</th>
+            <th class="px-4 py-2 border-b border-gray-300">Área</th>
+            <th class="px-4 py-2 border-b border-gray-300">Owner Antigo</th>
+            <th class="px-4 py-2 border-b border-gray-300">Owner Novo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let trade of tradesData" class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border-b border-gray-300">{{ trade.id }}</td>
+            <td class="px-4 py-2 border-b border-gray-300">{{ trade.area }}</td>
+            <td class="px-4 py-2 border-b border-gray-300">{{ trade.oldOwner }}</td>
+            <td class="px-4 py-2 border-b border-gray-300">{{ trade.newOwner }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
