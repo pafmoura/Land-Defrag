@@ -23,6 +23,7 @@ export class ResultsMapComponent implements OnInit {
   mapInstance!: Leaflet.Map;
   polygonsLayer: Leaflet.FeatureGroup = new Leaflet.FeatureGroup();
   private storageKey = 'results_data';
+  isWelcomeModalOpen = true;
 
   constructor(
     private backendApiService: BackendApiService,
@@ -72,6 +73,20 @@ export class ResultsMapComponent implements OnInit {
 
   closeStatistics() {
     this.isModalOpen = false;
+  }
+
+  closeWelcomeModal(){
+    this.isWelcomeModalOpen = false;
+    this.isToastOpen = true;
+  }
+
+  isToastOpen = false;
+  openToast() {
+    this.isToastOpen = true;
+  }
+
+  closeToast() {
+    this.isToastOpen = false;
   }
 
 }

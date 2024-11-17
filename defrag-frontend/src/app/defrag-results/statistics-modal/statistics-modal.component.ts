@@ -5,7 +5,6 @@ import { BaseChartDirective } from 'ng2-charts';
 import { BarController, ChartData, ChartOptions } from 'chart.js';
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'; 
 import { BackendApiService } from '../../services/backend-api.service';
-import * as d3 from 'd3';
 import * as Leaflet from 'leaflet';
 import proj4 from 'proj4';
 import { LeafletModule } from '@bluehalo/ngx-leaflet';
