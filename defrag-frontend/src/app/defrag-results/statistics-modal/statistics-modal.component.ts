@@ -119,23 +119,41 @@ export class StatisticsModalComponent implements OnInit {
   
     this.polygonsLayer.clearLayers();
     this.filteredLayer.clearLayers();
-    
+  
+    this.geoJsonUtilsService.addPolygonsWithBorders(
+      this.mapInstance,
+      this.polygonsLayer,
+      this.resultsData.gdf,
+      'grey' 
+    );
+  
     const filteredGeoJson = this.filterPolygonsByOwner(this.resultsData.gdf, this.filteredOwner);
   
     if (filteredGeoJson.features.length > 0) {
-      this.geoJsonUtilsService.addPolygonsFromGeoJSON(this.mapInstance, this.filteredLayer, filteredGeoJson);
+      this.geoJsonUtilsService.addPolygonsFromGeoJSON(
+        this.mapInstance,
+        this.filteredLayer,
+        filteredGeoJson
+      );
     }
   
+    // atualizar
     this.mapInstance.invalidateSize();
   
-    if (this.filteredLayer.getLayers().length > 0) {
-      try {
-        this.mapInstance.fitBounds(this.filteredLayer.getBounds());
-      } catch (e) {
-        console.error('Erro ao ajustar os limites do mapa:', e);
+    try {
+      const allBounds = new Leaflet.LatLngBounds([]);
+      if (this.polygonsLayer.getLayers().length > 0) {
+        allBounds.extend(this.polygonsLayer.getBounds());
       }
+      if (this.filteredLayer.getLayers().length > 0) {
+        allBounds.extend(this.filteredLayer.getBounds());
+      }
+      this.mapInstance.fitBounds(allBounds);
+    } catch (e) {
+      console.error('Erro ao ajustar os limites do mapa:', e);
     }
   }
+  
   
   
   

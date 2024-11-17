@@ -121,4 +121,66 @@ export class GeoJsonUtilsService {
     this.ownerColorMap.clear();
     this.storageService.removeItem(this.STORAGE_KEY);
   }
+
+
+  addPolygonsWithBorders(
+    map: Leaflet.Map,
+    layerGroup: Leaflet.FeatureGroup,
+    gdf: any,
+    borderColor: string = 'black'
+  ): void {
+    if (!map) {
+      console.error('Mapa não inicializado');
+      return;
+    }
+  
+    if (!gdf?.features || gdf.features.length === 0) {
+      console.error('Dados GeoJSON ausentes ou inválidos');
+      return;
+    }
+  
+    layerGroup.clearLayers();
+  
+    try {
+      gdf.features.forEach((feature: any) => {
+        if (feature?.geometry?.type === "MultiPolygon") {
+          const polygons = feature.geometry.coordinates.map((polygonCoords: any) =>
+            polygonCoords.map((coords: any) =>
+              coords.map((coordPair: any) => 
+                this.convertTM06ToLatLng(coordPair[0], coordPair[1])
+              )
+            )
+          );
+  
+          polygons.forEach((polygonCoords: any) => {
+            const polygon = Leaflet.polygon(polygonCoords, {
+              color: borderColor, // Cor da borda
+              fill: false,        // Sem preenchimento
+              weight: 1           // Espessura da borda
+            });
+  
+            const properties = feature.properties;
+            polygon.bindPopup(`
+              <b>Informações da Parcela</b><br>
+              ID: ${properties.PAR_ID}<br>
+              Área: ${properties.Shape_Area.toFixed(2)} m²<br>
+              Proprietário ID: ${properties.OWNER_ID}
+            `);
+  
+            layerGroup.addLayer(polygon);
+          });
+        }
+      });
+  
+      if (layerGroup.getLayers().length > 0) {
+        const bounds = layerGroup.getBounds();
+        map.flyToBounds(bounds, {
+          padding: [50, 50],
+          duration: 0.5
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao processar GeoJSON:', error);
+    }
+  }
 }
