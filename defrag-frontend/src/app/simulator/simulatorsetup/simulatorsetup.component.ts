@@ -50,6 +50,44 @@ export class SimulatorsetupComponent implements OnInit {
   ngOnInit() {}
   progress = 0;
   
+selectedFile: any;
+
+onFileChange(event: any) {
+  const fileList: FileList = event.target.files;
+
+  if (fileList.length > 0) {
+    this.selectedFile = fileList[0]; 
+    console.log('Selected file:', this.selectedFile);
+    this.readFile();
+  } else {
+    console.error('No file selected');
+  }
+}
+
+gdf_file : any = null;
+readFile() {
+  if (!this.selectedFile) {
+    console.error('No file to read');
+    return;
+  }
+
+
+  const reader = new FileReader();
+  reader.readAsArrayBuffer(this.selectedFile); 
+  reader.onload = () => {
+    if (reader.result != null) {
+      const blob = new Blob([reader.result], { type: this.selectedFile.type });
+      console.log('Blob created:', blob);
+      this.gdf_file = blob;
+    }
+  };
+  reader.onerror = (error) => {
+    console.error('Error reading file:', error);
+  };
+}
+
+
+
 
   onMapReady(map: Leaflet.Map) {
     this.mapInstance = map;
@@ -86,7 +124,8 @@ export class SimulatorsetupComponent implements OnInit {
     this.backendApiService.simulate({
       file_name: 'portalegre.gpkg',
       distribuition_name: this.distributionName,
-      owners_average_land: this.ownersAverageLand
+      owners_average_land: this.ownersAverageLand,
+      gdf_file: this.selectedFile
     }).subscribe({
       next: (response) => {
         console.log(response);

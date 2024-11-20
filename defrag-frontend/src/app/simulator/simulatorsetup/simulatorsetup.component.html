@@ -84,7 +84,7 @@ https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css
                     </h2>
 
                     <label class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 hover:bg-opacity-100 cursor-pointer opacity-0 group-hover:opacity-100 transition duration-300 rounded-2xl">
-                        <input type="file" class="hidden" />
+                        <input type="file" (change)="onFileChange($event)" class="hidden" />
                         <span class="text-[#719460] font-semibold">Clique para carregar</span>
                         <i class="fa-solid text-[#719460] fa-upload ml-2"></i>
                     </label>

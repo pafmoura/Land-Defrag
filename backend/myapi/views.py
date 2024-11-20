@@ -19,6 +19,7 @@ def simulate(request):
     try:
         file_name = request.POST["file_name"]
         file = request.FILES.get("gdf_file")
+        print(file)
         name = request.POST["distribuition_name"]
         owners_average_land = int(request.POST["owners_average_land"])
     except KeyError:

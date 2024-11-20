@@ -28,17 +28,22 @@ export class BackendApiService {
 
   
 
-  simulate(data: { file_name: string; distribuition_name: string; owners_average_land: number }): Observable<any> {
+  simulate(data: { file_name: string; distribuition_name: string; owners_average_land: number, gdf_file : any }): Observable<any> {
     const formData = new FormData();
     formData.append('file_name', data.file_name);
     formData.append('distribuition_name', data.distribuition_name);
     formData.append('owners_average_land', data.owners_average_land.toString());
-    console.log(formData);
+    if(data.gdf_file) {
+      formData.append('gdf_file', data.gdf_file);
+    }
+    console.log("AQUI"+formData.get('gdf_file'));
 
     return this.http.post(`${this.baseUrl}/simulate`, formData).pipe(
       catchError(this.handleError)
     );
   }
+
+
   
 
   private handleError(error: HttpErrorResponse): Observable<never> {
