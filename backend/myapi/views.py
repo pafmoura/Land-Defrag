@@ -58,7 +58,7 @@ def defrag(request):
     else:
         gdf = read_geopandas(generated_file_name)
         convert_types(gdf)
-        gdf_new, tk, _owners =  Defrag_Generator.defrag(gdf, add_pivots=Defrag_Generator.add_pivots_by_area, limit=104, reset=True)
+        gdf_new, tk, _owners =  Defrag_Generator.defrag(gdf, add_pivots=Defrag_Generator.add_pivots_by_area, limit=10, reset=True)
         save_file(gdf_new, defrag_file_name)
     
     return Response(status=status.HTTP_200_OK, data={"gdf": (gdf_new.__geo_interface__), "trackers": "Under maintenance :)"})

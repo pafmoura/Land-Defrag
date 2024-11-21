@@ -119,13 +119,14 @@ readFile() {
   initial_simulation: any = {};
 
   getLoadedLands() {
+    this.storageService.deleteAll();
     this.isLoading = true;
 
     this.backendApiService.simulate({
-      file_name: 'portalegre.gpkg',
+      file_name: this.selectedFile.name,
       distribuition_name: this.distributionName,
       owners_average_land: this.ownersAverageLand,
-      gdf_file: this.selectedFile
+      gdf_file: this.gdf_file
     }).subscribe({
       next: (response) => {
         console.log(response);

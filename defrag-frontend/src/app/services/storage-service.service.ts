@@ -29,6 +29,14 @@ export class StorageService {
     }
   }
 
+  deleteAll(): void {
+    try {
+      this.storage.clear();
+    } catch (error) {
+      console.error('Erro ao limpar o storage:', error);
+    }
+  }
+
   removeItem(key: string): void {
     try {
       this.storage.removeItem(key);

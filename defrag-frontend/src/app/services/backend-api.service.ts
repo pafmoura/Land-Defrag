@@ -36,7 +36,6 @@ export class BackendApiService {
     if(data.gdf_file) {
       formData.append('gdf_file', data.gdf_file);
     }
-    console.log("AQUI"+formData.get('gdf_file'));
 
     return this.http.post(`${this.baseUrl}/simulate`, formData).pipe(
       catchError(this.handleError)
