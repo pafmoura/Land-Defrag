@@ -68,33 +68,29 @@ https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css
 
                
 
-                <div class="bg-white border rounded-2xl h-[25%] w-2/3 shadow-sm hover:shadow-lg transition duration-100 mt-44 mb-12 pt-6 max-w-sm mx-auto flex flex-col items-center relative group">
-                    <div class="relative w-24 h-24">
-                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                            <circle class="text-gray-200" stroke-width="8" stroke="currentColor" fill="transparent" r="45" cx="50" cy="50" />
-                            <circle class="text-[#719460]" stroke-width="8" stroke-linecap="round" stroke="currentColor" fill="transparent" r="45" cx="50" cy="50" />
-                        </svg>
-                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                            <span class="text-xl font-bold">{{progress}}%</span>
-                        </div>
-                    </div>
-                    <h2 class="text-xl font-bold mb-6 flex items-center">
-                        Carregar Ficheiro 
-                        <i class="fa-solid text-[#719460] fa-upload ml-2"></i>
-                    </h2>
+                <div class="bg-white border rounded-2xl h-[25%] w-2/3 shadow-sm hover:shadow-lg transition duration-100 mt-44 mb-12 pt-6 max-w-sm mx-auto flex flex-col items-center justify-center relative group">
+                  <i class="fa-solid text-[#719460] fa-upload ml-2"></i>
 
-                    <label class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 hover:bg-opacity-100 cursor-pointer opacity-0 group-hover:opacity-100 transition duration-300 rounded-2xl">
-                        <input type="file" (change)="onFileChange($event)" class="hidden" />
-                        <span class="text-[#719460] font-semibold">Clique para carregar</span>
-                        <i class="fa-solid text-[#719460] fa-upload ml-2"></i>
-                    </label>
+                  <div class="flex items-center justify-center mb-6">
+                    <h2 class="text-xl font-bold ml-2">Carregar Ficheiro</h2>
+                  </div>
+                
+                  <label class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 hover:bg-opacity-100 cursor-pointer opacity-0 group-hover:opacity-100 transition duration-300 rounded-2xl">
+                    <input type="file" (change)="onFileChange($event)" class="hidden" />
+                    <span class="text-[#719460] font-semibold">Clique para carregar</span>
+                    <i class="fa-solid text-[#719460] fa-upload ml-2"></i>
+                  </label>
                 </div>
             </div>
 
             
 
             <div class="flex-[2]">
-                <div class="bg-white rounded-lg p-6 shadow-lg h-[40%] mb-8">
+                <div class="bg-white rounded-lg p-6 shadow-lg h-[40%] mb-8"
+                [class.opacity-30]="!selectedFile" 
+                [class.pointer-events-none]="!selectedFile">
+
+                
                   <h2 class="text-3xl font-bold font-dm-sans text mb-6">Parametrização</h2>
                   <div class="space-y-8">
                     <div class="flex gap-16">
@@ -113,7 +109,7 @@ https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css
                 
                     </div>
                     <div class="w-full">
-                        <button class="w-full py-3 bg-[#719460] text-white rounded-lg hover:bg-[#719450]" (click)="getLoadedLands()">
+                        <button class="w-full py-3 mb-6 bg-[#719460] text-white rounded-lg hover:bg-[#719450]" (click)="getLoadedLands()">
                           Iniciar Simulação
                         </button>
                       </div>
@@ -141,7 +137,7 @@ https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css
                       </div>
                     </div>
                     <div class="w-full">
-                        <button class="w-full py-3 bg-[#719460] text-white rounded-lg hover:bg-[#719450]" (click)="runDefrag()">
+                        <button class="w-full mb-6 py-3 bg-[#719460] text-white rounded-lg hover:bg-[#719450]" (click)="runDefrag()">
                           Executar Algoritmo
                         </button>
                       </div>

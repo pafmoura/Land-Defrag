@@ -47,10 +47,19 @@ Número de Terrenos por Owner        </button>
         <div class="w-full h-[70vh] mx-2" leaflet [leafletOptions]="mapOptions" (leafletMapReady)="onMapReady($event)">
         </div>
       </div>
-      <div *ngIf="selectedTab === 'chart3'" class="w-full flex justify-center">
-        <p>Gráfico 3</p>
+      <div *ngIf="selectedTab === 'chart3'" class="w-full flex flex-col justify-center h-[calc(100vh-40%)] items-center">
+        <h3 class="text-lg font-semibold mb-4 mt-4">Área por Owner | Antes e Depois</h3>
+        <canvas
+          baseChart
+          [datasets]="areaChartData.datasets"
+          [labels]="areaChartLabels"
+          [options]="barChartOptions"
+          [legend]="true"
+          [type]="'bar'"
+          class="w-full h-[70vh]">
+        </canvas>
       </div>
-  
+              
       <button 
         class="mt-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
         (click)="close.emit()">

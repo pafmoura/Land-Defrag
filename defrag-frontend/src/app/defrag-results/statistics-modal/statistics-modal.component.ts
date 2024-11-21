@@ -107,6 +107,25 @@ export class StatisticsModalComponent implements OnInit {
   }
 
 
+  private calculateOwnerAreas(data: any): { [ownerId: string]: number } {
+    const ownerAreas: { [ownerId: string]: number } = {};
+  
+    data.features.forEach((feature: any) => {
+      const ownerId = feature.properties?.OWNER_ID;
+      const area = feature.properties?.Shape_Area || 0;
+  
+      if (!ownerAreas[ownerId]) {
+        ownerAreas[ownerId] = 0;
+      }
+  
+      ownerAreas[ownerId] += area; // Soma a área
+    });
+  
+    return ownerAreas;
+  }
+  
+  
+
   onOwnerChange(ownerId: string) {
     console.log('Owner Changed:', ownerId);
     this.filteredOwner = ownerId;
@@ -191,6 +210,27 @@ export class StatisticsModalComponent implements OnInit {
     ]
   };
 
+  areaBefore: { [ownerId: string]: number } = {};
+  areaAfter: { [ownerId: string]: number } = {};
+  areaChartLabels: string[] = [];
+  areaChartData: ChartData<'bar'> = {
+    labels: this.areaChartLabels,
+    datasets: [
+      {
+        data: [],
+        label: 'Área Antes da Simulação',
+        backgroundColor: 'blue',
+        barThickness: 20,
+      },
+      {
+        data: [],
+        label: 'Área Depois da Simulação',
+        backgroundColor: 'orange',
+        barThickness: 20,
+      },
+    ],
+  };
+
   updateBarChartData() {
     const ownerPropertyCount: { [key: string]: { before: number; after: number } } = {};
 
@@ -223,6 +263,18 @@ export class StatisticsModalComponent implements OnInit {
 
     const sumBefore = Object.values(ownerPropertyCount).reduce((acc, o) => acc + o.before, 0);
     const sumAfter = Object.values(ownerPropertyCount).reduce((acc, o) => acc + o.after, 0);
+
+    this.areaBefore = this.calculateOwnerAreas(this.initialSimulation);
+    this.areaAfter = this.calculateOwnerAreas(this.resultsData.gdf);
+    this.areaChartLabels = Object.keys(this.areaBefore);
+    this.areaChartData.datasets[0].data = this.areaChartLabels.map(owner => this.areaBefore[owner] || 0);
+    this.areaChartData.datasets[1].data = this.areaChartLabels.map(owner => this.areaAfter[owner] || 0);
+
+    console.log('Área Antes:', this.areaChartData.datasets[0].data);
+    console.log('Área Depois:', this.areaChartData.datasets[1].data);
+
+
+
   }
 
   selectedTab = 'chart1';
