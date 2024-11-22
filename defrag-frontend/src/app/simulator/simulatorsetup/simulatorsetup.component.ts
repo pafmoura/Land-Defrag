@@ -24,7 +24,7 @@ export class SimulatorsetupComponent implements OnInit {
   isLoading: boolean = false;
   distributionName: string = 'uniform';
   ownersAverageLand: number = 8;
-  algorithm: string = 'Maximização de Agregação';
+  algorithm: string = 'unico';
   maxAreaDifference: number = 5500;
 
   isSimulationLoaded = false;

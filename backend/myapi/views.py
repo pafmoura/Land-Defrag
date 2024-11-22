@@ -1,3 +1,4 @@
+from myapi.utils.classes.redistribution_defrag import Redistribute
 from myapi.utils.classes.defrag_classes import Defrag_Generator
 from myapi.utils.geopandas_wrapper import check_geopackage_status, convert_types, read_geopandas, save_file
 from myapi.utils.utils import preprocess_geopandas
@@ -13,6 +14,11 @@ from rest_framework.response import Response
 def test_connection(_request):
     return Response(status=status.HTTP_200_OK, data={"": "Alive"})
 
+
+ALGORITHMS = {
+    "unico": Defrag_Generator.defrag,
+    "pedro": Redistribute.redistribute,  
+}
 
 @api_view(["POST"])
 def simulate(request):
@@ -58,7 +64,15 @@ def defrag(request):
     else:
         gdf = read_geopandas(generated_file_name)
         convert_types(gdf)
-        gdf_new, tk, _owners =  Defrag_Generator.defrag(gdf, add_pivots=Defrag_Generator.add_pivots_by_area, limit=10, reset=True)
+        defrag_function = ALGORITHMS.get(algorithm_name, None)
+        if not defrag_function:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error": f"Algorithm '{algorithm_name}' not found."}
+            )
+
+
+        gdf_new, tk, _owners =  defrag_function(gdf=gdf, add_pivots=Defrag_Generator.add_pivots_by_area, limit=11, reset=True)
         save_file(gdf_new, defrag_file_name)
     
     return Response(status=status.HTTP_200_OK, data={"gdf": (gdf_new.__geo_interface__), "trackers": "Under maintenance :)"})
