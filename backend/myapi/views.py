@@ -2,6 +2,7 @@ from myapi.utils.classes.redistribution_defrag import Redistribute
 from myapi.utils.classes.defrag_classes import Defrag_Generator
 from myapi.utils.geopandas_wrapper import check_geopackage_status, convert_types, read_geopandas, save_file
 from myapi.utils.utils import preprocess_geopandas
+from myapi.utils.classes.beam_search_algorithm import MutationalRedistribute
 
 import geopandas as gpd
 
@@ -18,6 +19,7 @@ def test_connection(_request):
 ALGORITHMS = {
     "unico": Defrag_Generator.defrag,
     "pedro": Redistribute.redistribute,  
+    "beamsearch": MutationalRedistribute.optimize,
 }
 
 @api_view(["POST"])
@@ -72,7 +74,7 @@ def defrag(request):
             )
 
 
-        gdf_new, tk, _owners =  defrag_function(gdf=gdf, add_pivots=Defrag_Generator.add_pivots_by_area, limit=11, reset=True)
+        gdf_new, tk, _owners =  defrag_function(gdf=gdf, add_pivots=Defrag_Generator.add_pivots_by_area, limit=50, reset=True)
         save_file(gdf_new, defrag_file_name)
     
     return Response(status=status.HTTP_200_OK, data={"gdf": (gdf_new.__geo_interface__), "trackers": "Under maintenance :)"})
