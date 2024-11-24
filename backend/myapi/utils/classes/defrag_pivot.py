@@ -1,5 +1,5 @@
 import numpy as np
-
+# PODRE
 class Swap:
     def __init__(self, id1, id2, owner1, owner2):
         self.id1 = id1

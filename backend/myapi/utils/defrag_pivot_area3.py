@@ -82,6 +82,10 @@ class Owner:
         ids = [item[0] for item in combination]
         for id in ids:
             self.swap(id, gdf)
+
+    def hard_buy_terrain(self, ids_to_filter, gdf):
+        for id in ids_to_filter:
+            self.swap(id, gdf)
     
     def get_border_ids(self, gdf):
         ids_neighbors = gdf.loc[gdf["OWNER_ID"] == self.id, ["OBJECTID", "neighbors"]] 
@@ -106,8 +110,10 @@ class Owner:
                 if len(ids_neighbors.loc[ids_neighbors["OBJECTID"] == neighbor]) != 0 and ids_neighbors.loc[ids_neighbors["OBJECTID"]  == neighbor].iloc[0]["cluster"] == -1:
                     find_neighbors(neighbor, ids, num_cluster)
 
-        ids_neighbors = gdf.loc[gdf["OWNER_ID"] == self.id]
-        ids_neighbors["cluster"] = -1
+        ids_neighbors = gdf.loc[gdf["OWNER_ID"] == self.id].copy()
+        if len(ids_neighbors) == 0:
+            return []
+        ids_neighbors.loc[:, "cluster"] = -1
         ids_neighbors_to_search = ids_neighbors.copy()
         cluster_num = 0
 
@@ -241,7 +247,7 @@ class Defrag_Generator:
                 new_neighbors = []
                 for neighbor in neighbors:
                     row = terrenos.loc[terrenos["OBJECTID"] == neighbor]
-                    if len(row) == 0 or row["OWNER_ID"].iloc[0] != owner_id or neighbor in visited:
+                    if len(row) == 0 or row["locked"].iloc[0] or row["OWNER_ID"].iloc[0] != owner_id or neighbor in visited:
                         continue
                     row = row.iloc[0]
                     indexes.append(terrenos.index[terrenos["OBJECTID"] == neighbor][0])
@@ -284,7 +290,7 @@ class Defrag_Generator:
             owners_neighbors.append((owner, owner.get_neighbors(gdf)))
         
         owners_neighbors = sorted(owners_neighbors, key=lambda x: len(x[1]))
-        
+        i= 0
         for owner_neighbors in owners_neighbors:
             owner, neighbors = owner_neighbors
             neighbors_actions = [Defrag_Generator.get_heuristic_and_action(gdf, neighbor) for neighbor in neighbors]
@@ -293,7 +299,9 @@ class Defrag_Generator:
             owner.swap(neighbor, gdf)
 
             ids_filter, neighbors_filter = owner.get_border_ids(gdf)
+            ids_filter = ids_filter[:min(20, len(ids_filter))]
 
+            neighbors_filter = neighbors_filter[:min(20, len(neighbors_filter))]
             if area == 0:
                 gdf.loc[gdf["OBJECTID"] == neighbor, "locked"] = True
                 owner.sell_unlocked_terrains(gdf)
@@ -302,6 +310,7 @@ class Defrag_Generator:
                 owner.filter_areas(ids_filter, np.abs(area), gdf)
             else:
                 owner.buy_terrain(neighbors_filter, np.abs(area), gdf)
+            i+=1
 
     @classmethod
     def error_diff(cls, gdf, owners):
@@ -315,12 +324,23 @@ class Defrag_Generator:
         return np.sqrt(rmsd/len(owners)), diff_area_owner
 
     @classmethod
-    def min_dist(cls, gdf, id):
+    def assign_better_owner(cls, gdf, id, i):
+        ids = Owner.owners.keys()
+        owners = gdf["OWNER_ID"].unique()
+        for owner in ids:
+            if owner not in owners:
+                return owner
         location = gdf.loc[gdf["OBJECTID"] == id].iloc[0]["geometry"]
-        distances = gdf[["OBJECTID"]].copy() 
+        distances = gdf[["OBJECTID", "OWNER_ID"]].copy() 
         distances["distance"] = gdf["geometry"].distance(location)
         distances = distances.sort_values(by="distance").reset_index(drop=True)
-        return distances.iloc[1]
+        distances = distances.iloc[:10]
+        idxs = distances.groupby("OWNER_ID")["distance"].idxmin()
+        distances = distances.loc[idxs]
+        if  i < len(distances):
+            return distances.iloc[i]["OWNER_ID"]
+        else:
+            return None
 
     @classmethod
     def sell_clusters(cls, gdf, owners):
@@ -332,6 +352,8 @@ class Defrag_Generator:
                 clusters = owner.get_clusters(gdf)
                 best_area = 0
                 best_cluster = -1
+                if len(clusters) == 0:
+                    continue
                 for cluster_id in clusters["cluster"].unique():
                     potential_area = Owner.calculater_cluster_area(owner.id, cluster_id, clusters)
                     if np.abs(area - best_area) >= np.abs(area - potential_area):
@@ -344,46 +366,73 @@ class Defrag_Generator:
         return gdf, new_owners
 
     @classmethod
-    def defrag(cls, gdf, add_pivots, limit = -1, patience = 2):
-        def is_making_decisions(num_consecutive_aggr, gdf, owners):            
-            if num_consecutive_aggr >= (patience + 3):
-                return False
-            if num_consecutive_aggr >= (patience + 2):
-                reset_gdf()
-            elif num_consecutive_aggr >= (patience + 1):
-                gdf, owners = Defrag_Generator.sell_clusters(gdf, owners)
+    def defrag(cls, gdf, add_pivots, limit = -1, patience = 3):
+        def continue_search():
+            return (limit == -1 or i < limit) or continue_search_var
+        def is_making_decisions(num_consecutive_aggr, best_consecutive_aggr, gdf, owners):
+            limits = [patience + i for i in range(2)]
+            make_decision = (len(gdf.loc[gdf["locked"] == True, "OBJECTID"].values) < stop_decision_treshhold)
+            print("LOCKED ",len(gdf.loc[gdf["locked"] == True, "OBJECTID"].values))
 
-            return (limit == -1 or i < limit)
+            if num_consecutive_aggr >= limits[1]:
+                reset_gdf()
+            elif num_consecutive_aggr >= limits[0]:
+                gdf, owners = Defrag_Generator.sell_clusters(gdf, owners)                
+            
+            return make_decision
         
         def reset_gdf():
             gdf["SELL"] = False
             gdf["locked"] = False
+
+        def init_states():
+            gdf["potential_owner"] = min(gdf["OWNER_ID"].unique())
     
-        def update_variables(i, past_aggr, aggr_error):
-           return i + 1, aggr_error, ((num_consecutive_aggr + 1) * (past_aggr == aggr_error))
+        def update_variables(i, past_aggr, aggr_error, best_error):
+           return i + 1, aggr_error, ((num_consecutive_aggr + 1) * (past_aggr == aggr_error)), ((best_consecutive_aggr + 1) * (best_error <= aggr_error))
         
-        reset_gdf()
+        init_states()
+        stop_decision_treshhold = len(gdf) * 0.9
+        continue_search_var = True
         best_gdf = gdf.copy()
-        best_error = Defrag_Generator.calculate_aggregation_error(gdf)
-        past_aggr = best_error
         i = 0
-        num_consecutive_aggr = 0
+        j = 0
         tk = Traker()
         owners = Defrag_Generator.create_owners(gdf, tk)
+        first_best_aggr = Defrag_Generator.calculate_aggregation_error(gdf)
 
-        while is_making_decisions(num_consecutive_aggr, gdf, owners):
-            add_pivots(owners, gdf)
-            Defrag_Generator.swap_owners(owners, gdf)
+        while continue_search():
+            reset_gdf()
+            num_consecutive_aggr = 0
+            best_consecutive_aggr = 0
+            best_error = first_best_aggr
+            past_aggr = best_error
+            
+            while is_making_decisions(num_consecutive_aggr, best_consecutive_aggr, gdf, owners):
+                add_pivots(owners, gdf)
+                Defrag_Generator.swap_owners(owners, gdf)
 
-            aggr_error = Defrag_Generator.calculate_aggregation_error(gdf)
-            tk.add_error(aggr_error)
+                aggr_error = Defrag_Generator.calculate_aggregation_error(gdf)
+                tk.add_error(aggr_error)
 
-            print(f"Iteration: {i} -> Error: {aggr_error}")
+                print(f"Iteration: {i} -> Error: {aggr_error}")
 
-            if best_error >= aggr_error:
-                best_gdf = gdf.copy()
-                best_error = aggr_error
+                i, past_aggr, num_consecutive_aggr, best_consecutive_aggr = update_variables(i, past_aggr, aggr_error, best_error)
+                
+                if best_error >= aggr_error:
+                    best_gdf = gdf.copy()
+                    best_error = aggr_error
 
-            i, past_aggr, num_consecutive_aggr = update_variables(i, past_aggr, aggr_error)
-    
+            ids = best_gdf.loc[best_gdf["SELL"] == True, "OBJECTID"].values
+            print("SELLING ",len(ids))
+            for id in ids:
+                closest_num = gdf.loc[gdf["OBJECTID"] ==id].iloc[0]["potential_owner"]
+                gdf.loc[gdf["OBJECTID"] ==id].iloc[0]["potential_owner"] = closest_num + 1
+                owner_id = Defrag_Generator.assign_better_owner(gdf, id, closest_num)
+                if owner_id is None:
+                    continue_search_var = False
+                    break
+                gdf.loc[gdf["OBJECTID"] ==id, "OWNER_ID"] = owner_id
+            j += 1
+
         return best_gdf, tk, owners
