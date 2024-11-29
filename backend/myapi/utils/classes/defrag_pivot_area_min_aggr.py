@@ -1,3 +1,5 @@
+import numpy as np
+
 class Swap:
     def __init__(self, id1, id2, owner1, owner2):
         self.id1 = id1
@@ -182,7 +184,7 @@ class Owner:
         return closest_combination, closest_sum    
 
 
-class Defrag_Generator:
+class Defrag_Generator_Min_Aggr:
 
     def __init__(self):
         pass
@@ -220,7 +222,7 @@ class Defrag_Generator:
     def base_aggregation_error(cls, gdf):
         test = gdf.copy()
         test["OWNER_ID"] = 0
-        return Defrag_Generator.calculate_aggregation_error(test)
+        return Defrag_Generator_Min_Aggr.calculate_aggregation_error(test)
     
     @classmethod
     def create_owners(cls, gdf, tk):
@@ -293,7 +295,7 @@ class Defrag_Generator:
         i= 0
         for owner_neighbors in owners_neighbors:
             owner, neighbors = owner_neighbors
-            neighbors_actions = [Defrag_Generator.get_heuristic_and_action(gdf, neighbor) for neighbor in neighbors]
+            neighbors_actions = [Defrag_Generator_Min_Aggr.get_heuristic_and_action(gdf, neighbor) for neighbor in neighbors]
             neighbors_actions = sorted(neighbors_actions, key=lambda x: np.abs(x[0]))
             area, neighbor = neighbors_actions[0]
             owner.swap(neighbor, gdf)
@@ -344,7 +346,7 @@ class Defrag_Generator:
 
     @classmethod
     def sell_clusters(cls, gdf, owners):
-        _rmsd, diff_area_owner = Defrag_Generator.error_diff(gdf, owners)
+        _rmsd, diff_area_owner = Defrag_Generator_Min_Aggr.error_diff(gdf, owners)
         diff_area_owner = sorted(diff_area_owner, key=lambda x: x[1])
         new_owners = []
         for owner, area in diff_area_owner:
@@ -366,7 +368,7 @@ class Defrag_Generator:
         return gdf, new_owners
 
     @classmethod
-    def defrag(cls, gdf, add_pivots, limit = -1, patience = 3):
+    def defrag(cls, gdf, limit = -1, patience = 3):
         def continue_search():
             return (limit == -1 or i < limit) or continue_search_var
         def is_making_decisions(num_consecutive_aggr, best_consecutive_aggr, gdf, owners):
@@ -377,7 +379,7 @@ class Defrag_Generator:
             if num_consecutive_aggr >= limits[1]:
                 reset_gdf()
             elif num_consecutive_aggr >= limits[0]:
-                gdf, owners = Defrag_Generator.sell_clusters(gdf, owners)                
+                gdf, owners = Defrag_Generator_Min_Aggr.sell_clusters(gdf, owners)                
             
             return make_decision
         
@@ -398,8 +400,8 @@ class Defrag_Generator:
         i = 0
         j = 0
         tk = Traker()
-        owners = Defrag_Generator.create_owners(gdf, tk)
-        first_best_aggr = Defrag_Generator.calculate_aggregation_error(gdf)
+        owners = Defrag_Generator_Min_Aggr.create_owners(gdf, tk)
+        first_best_aggr = Defrag_Generator_Min_Aggr.calculate_aggregation_error(gdf)
 
         while continue_search():
             reset_gdf()
@@ -409,10 +411,10 @@ class Defrag_Generator:
             past_aggr = best_error
             
             while is_making_decisions(num_consecutive_aggr, best_consecutive_aggr, gdf, owners):
-                add_pivots(owners, gdf)
-                Defrag_Generator.swap_owners(owners, gdf)
+                Defrag_Generator_Min_Aggr.add_pivots_by_area(owners, gdf)
+                Defrag_Generator_Min_Aggr.swap_owners(owners, gdf)
 
-                aggr_error = Defrag_Generator.calculate_aggregation_error(gdf)
+                aggr_error = Defrag_Generator_Min_Aggr.calculate_aggregation_error(gdf)
                 tk.add_error(aggr_error)
 
                 print(f"Iteration: {i} -> Error: {aggr_error}")
@@ -428,7 +430,7 @@ class Defrag_Generator:
             for id in ids:
                 closest_num = gdf.loc[gdf["OBJECTID"] ==id].iloc[0]["potential_owner"]
                 gdf.loc[gdf["OBJECTID"] ==id].iloc[0]["potential_owner"] = closest_num + 1
-                owner_id = Defrag_Generator.assign_better_owner(gdf, id, closest_num)
+                owner_id = Defrag_Generator_Min_Aggr.assign_better_owner(gdf, id, closest_num)
                 if owner_id is None:
                     continue_search_var = False
                     break
