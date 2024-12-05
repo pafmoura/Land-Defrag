@@ -1,4 +1,5 @@
-from myapi.models import Defrag_Process
+from multiprocessing import Process
+from myapi.models import Defrag_Process, Utilizador
 
 from myapi.serializers import Defrag_Process_Serializer
 
@@ -7,12 +8,12 @@ from myapi.utils.classes.redistribution_defrag import Redistribute
 from myapi.utils.classes.defrag_classes import Defrag_Generator
 from myapi.utils.classes.stats import Stats
 from myapi.utils.geopandas_wrapper import check_geopackage_status, convert_types, read_geopandas, save_file
-from myapi.utils.utils import preprocess_geopandas
+from myapi.utils.utils import defrag_save, preprocess_geopandas
 from myapi.utils.classes.beam_search_algorithm import MutationalRedistribute
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-
+from django.contrib.auth.decorators import login_required
 
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -20,26 +21,30 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 
+
+from rest_framework.response import Response
+from rest_framework import status
+
+
+
 @api_view(["GET"])
 def test_connection(_request):
     return Response(status=status.HTTP_200_OK, data={"": "Alive"})
 
-
 ALGORITHMS = {
-    "unico": Defrag_Generator.defrag,
     "Menor Indice de Aggr": Defrag_Generator_Min_Aggr.defrag,
     "pedro": Redistribute.redistribute,  
     "beamsearch": MutationalRedistribute.optimize,
 }
 
-# INITIAL_AREAS = {
-#     "unico": Defrag_Generator.calculate_initial_areas,
-#     "pedro": Redistribute.calculate_initial_areas,
-#     "beamsearch": MutationalRedistribute.calculate_initial_areas
-# }
 
 @api_view(["POST"])
 def simulate(request):
+    try:
+        user = check_user(request)
+    except Exception:
+        return Response({"message": "Not logged in"}, status=status.HTTP_401_UNAUTHORIZED)
+
     try:
         file_name = request.POST["file_name"]
         file = request.FILES.get("gdf_file")
@@ -67,6 +72,11 @@ def simulate(request):
 @api_view(["POST"])
 def defrag(request):
     try:
+        user = check_user(request)
+    except Exception:
+        return Response({"message": "Not logged in"}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    try:
         algorithm_name = request.POST["algorithm_name"]
         generated_file_name = request.POST["generated_file_name"]
     except KeyError:
@@ -88,17 +98,30 @@ def defrag(request):
                 data={"error": f"Algorithm '{algorithm_name}' not found."}
             )
 
+        user = get_user(request)
+        new_defrag = Defrag_Process.objects.create(
+              user=user,
+              generated_file_name=defrag_file_name,
+              is_completed=False)
 
-        gdf_new, tk, owners =  defrag_function(gdf=gdf, add_pivots=Defrag_Generator.add_pivots_by_area, limit=50, reset=True)
-        save_file(gdf_new, defrag_file_name)
+        new_defrag.save()
+
+        # process = Process(target=defrag_save, args=(gdf, defrag_function, defrag_file_name, new_defrag))
+        # process.start()
+
+        # TODO Temporário
+        defrag_save(gdf, defrag_function, defrag_file_name, new_defrag)
     
-        stats = Stats.get_json(gdf, owners, is_using_class_Onwer=True)
-        Stats.save(stats, defrag_file_name + ".json")
 
-    return Response(status=status.HTTP_200_OK, data={"gdf": (gdf_new.__geo_interface__), "stats": stats })
+    return Response(status=status.HTTP_200_OK, data={"message": "Process Initialized" })
 
-@api_view(["GET"])
+@api_view(["POST"])
 def logout(request):
+    try:
+        user = check_user(request)
+    except Exception:
+        return Response({"message": "Not logged in"}, status=status.HTTP_401_UNAUTHORIZED)
+    
     if request.META.get("HTTP_AUTHORIZATION"):
         try:
             token = Token.objects.get( key=request.META.get("HTTP_AUTHORIZATION").split(" ")[1])
@@ -113,7 +136,17 @@ class LoginView(APIView):
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
+
+        if not username and not password:
+            try:
+                user = User.objects.get(username="Convidado")
+            except User.DoesNotExist:
+                user = create_default_user()
+            username = "Convidado"
+            password = "123"
+
         user = authenticate(username=username, password=password)
+
         if user:
             token, _ = Token.objects.get_or_create(user=user)
             return Response({"token": token.key})
@@ -122,19 +155,34 @@ class LoginView(APIView):
         
 @api_view(["GET"])
 def get_states_defrag(request):
-    if request.META.get("HTTP_AUTHORIZATION"):
-        try:
-            token = Token.objects.get(key=request.META.get("HTTP_AUTHORIZATION").split(" ")[1])
-            user = token.user
-            return Response({"name": user.username})
-        except Token.DoesNotExist:
-            user = get_or_create_default_user()
-    
-    processes = Defrag_Process.objects.filter(user=user)
+    try:
+        user = check_user(request)
+    except Exception:
+        return Response({"message": "Not logged in"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    processes = Defrag_Process.objects.filter(user=Utilizador.objects.get(user=user))
     serializer = Defrag_Process_Serializer(processes, many=True)
 
     return Response({"result": serializer.data})
 
+def get_user(request):
+    if request.META.get("HTTP_AUTHORIZATION"):
+        token = Token.objects.get(key=request.META.get("HTTP_AUTHORIZATION").split(" ")[1])
+        user = token.user
+          
+    return Utilizador.objects.get(user=user)
 
-def get_or_create_default_user():
-    return User.objects.get_or_create(username="Convidado", password="123")
+def check_user(request):
+    user = get_user(request)
+    if not user:
+        raise Exception(user)
+    return user
+
+def create_default_user():
+    user = User.objects.create(username="Convidado")
+    user.set_password("123")
+    user.save()
+
+    utilizador = Utilizador.objects.create(user=user)
+    utilizador.save()
+    return utilizador

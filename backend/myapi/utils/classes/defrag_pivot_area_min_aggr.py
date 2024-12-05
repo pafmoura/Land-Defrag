@@ -368,7 +368,7 @@ class Defrag_Generator_Min_Aggr:
         return gdf, new_owners
 
     @classmethod
-    def defrag(cls, gdf, limit = -1, patience = 3):
+    def defrag(cls, gdf, limit = 5, patience = 3):
         def continue_search():
             return (limit == -1 or i < limit) or continue_search_var
         def is_making_decisions(num_consecutive_aggr, best_consecutive_aggr, gdf, owners):
@@ -402,6 +402,8 @@ class Defrag_Generator_Min_Aggr:
         tk = Traker()
         owners = Defrag_Generator_Min_Aggr.create_owners(gdf, tk)
         first_best_aggr = Defrag_Generator_Min_Aggr.calculate_aggregation_error(gdf)
+        best_gdf_all = gdf.copy()
+        best_error_all = first_best_aggr
 
         while continue_search():
             reset_gdf()
@@ -437,4 +439,8 @@ class Defrag_Generator_Min_Aggr:
                 gdf.loc[gdf["OBJECTID"] ==id, "OWNER_ID"] = owner_id
             j += 1
 
-        return best_gdf, tk, owners
+            if best_error_all >= best_error:
+                best_gdf_all = best_gdf.copy()
+                best_error_all = best_error
+                
+        return best_gdf_all, tk, owners
