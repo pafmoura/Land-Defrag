@@ -1,3 +1,4 @@
+import json
 from myapi.utils.old_algorithms.defrag_pivot_area import Owner
 import numpy as np
 
@@ -12,7 +13,7 @@ class Stats:
         diff_area_owner = []
         for owner in owners:
             area = owner.desired_area - Owner.calculate_area(owner.id, gdf)
-            diff_area_owner.append((owner, area))
+            diff_area_owner.append((owner.id, area))
             rmsd += (area) ** 2
 
         return np.sqrt(rmsd/len(owners)), diff_area_owner
@@ -69,8 +70,23 @@ class Stats:
         aggregation_error = Stats.calculate_aggregation_error(gdf)
 
         return {"error_diff": error_diff, "diff_areas": diff_areas, "aggregation_error": aggregation_error}
-    
+
     @classmethod
-    def save(cls, json, file_path):
+    def convert_for_json(cls, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, tuple):  # Convert tuples to lists
+            return [cls.convert_for_json(item) for item in obj]
+        elif isinstance(obj, list):  # Process lists
+            return [cls.convert_for_json(item) for item in obj]
+        elif isinstance(obj, dict):  # Process dictionaries
+            return {key: cls.convert_for_json(value) for key, value in obj.items()}
+        else:
+            return obj  # Return as is if already serializable
+    @classmethod
+    def save(cls, data, file_path):
+        data = cls.convert_for_json(data)
         with open(file_path, "w") as f:
-            f.write(str(json))
+            json.dump(data, f, indent=4)

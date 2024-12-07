@@ -1,3 +1,5 @@
+import os
+from django.core.files.storage import FileSystemStorage
 from myapi.utils.classes.populate_classes import Population_Generator
 from myapi.utils.classes.stats import Stats
 from myapi.utils.geopandas_wrapper import add_neighbours, save_file
@@ -26,8 +28,14 @@ def defrag_save(gdf, defrag_function, defrag_file_name, new_defrag):
     save_file(gdf_new, defrag_file_name)
 
     stats = Stats.get_json(gdf, owners, is_using_class_Onwer=True)
-    Stats.save(stats, defrag_file_name + ".json")
+    fs = FileSystemStorage()
+    file_path = fs.path(defrag_file_name)
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    Stats.save(stats, file_path+ ".json")
 
     new_defrag.is_completed = True
 
     new_defrag.save()
+
+
+

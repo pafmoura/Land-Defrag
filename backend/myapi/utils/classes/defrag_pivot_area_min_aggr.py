@@ -370,7 +370,7 @@ class Defrag_Generator_Min_Aggr:
     @classmethod
     def defrag(cls, gdf, limit = 5, patience = 3):
         def continue_search():
-            return (limit == -1 or i < limit) or continue_search_var
+            return (limit == -1 or j < limit) and continue_search_var
         def is_making_decisions(num_consecutive_aggr, best_consecutive_aggr, gdf, owners):
             limits = [patience + i for i in range(2)]
             make_decision = (len(gdf.loc[gdf["locked"] == True, "OBJECTID"].values) < stop_decision_treshhold)

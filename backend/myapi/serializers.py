@@ -5,7 +5,6 @@ class Defrag_Process_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Defrag_Process
         fields = (
-            "generated_file_name",
             "is_completed",
-            "file_path",
+            "generated_file_name",
         )

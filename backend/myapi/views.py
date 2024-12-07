@@ -7,7 +7,7 @@ from myapi.utils.classes.defrag_pivot_area_min_aggr import Defrag_Generator_Min_
 from myapi.utils.classes.redistribution_defrag import Redistribute
 from myapi.utils.classes.defrag_classes import Defrag_Generator
 from myapi.utils.classes.stats import Stats
-from myapi.utils.geopandas_wrapper import check_geopackage_status, convert_types, read_geopandas, save_file
+from myapi.utils.geopandas_wrapper import check_geopackage_status, convert_types, read_geopandas, read_stats, save_file
 from myapi.utils.utils import defrag_save, preprocess_geopandas
 from myapi.utils.classes.beam_search_algorithm import MutationalRedistribute
 
@@ -160,10 +160,20 @@ def get_states_defrag(request):
     except Exception:
         return Response({"message": "Not logged in"}, status=status.HTTP_401_UNAUTHORIZED)
 
-    processes = Defrag_Process.objects.filter(user=Utilizador.objects.get(user=user))
-    serializer = Defrag_Process_Serializer(processes, many=True)
+    generated_file_name = request.GET.get('generated_file_name', None)
 
-    return Response({"result": serializer.data})
+    if not generated_file_name:
+        processes = Defrag_Process.objects.filter(user=user)
+        serializer = Defrag_Process_Serializer(processes, many=True)
+        return Response({"result": serializer.data})
+    
+    process = Defrag_Process.objects.filter(user=user, generated_file_name=generated_file_name)
+    if process.exists():
+        gdf_new = read_geopandas(generated_file_name)
+        stats_new = read_stats(generated_file_name + ".json")
+        return Response({"gdf": gdf_new.__geo_interface__, "stats": stats_new}, status=status.HTTP_200_OK)
+    else:
+        return Response({"gdf":{}}, status=status.HTTP_404_NOT_FOUND)
 
 def get_user(request):
     if request.META.get("HTTP_AUTHORIZATION"):

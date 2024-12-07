@@ -1,4 +1,5 @@
 import ast
+import json
 import os
 from backend import settings
 import geopandas as gpd
@@ -12,6 +13,12 @@ def read_geopandas(file_name, file = None):
         return gpd.read_file(file)
 
     return gpd.read_file(file_path)
+
+def read_stats(file_name):
+    fs = FileSystemStorage()
+    file_path = fs.path(file_name)
+    with open(file_path, 'r') as file:
+        return json.load(file)
 
 def convert_types(gdf):
     gdf['neighbors'] = gdf['neighbors'].apply(lambda x: [int(i) for i in ast.literal_eval(x)])
