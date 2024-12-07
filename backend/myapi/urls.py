@@ -7,6 +7,6 @@ urlpatterns = [
     path("test", views.test_connection, name="test_connection"),
     path("simulate", views.simulate, name="simulate"),
     path("defrag", views.defrag, name="defrag"),
+    path("processes/<path:generated_file_name>", views.get_states_defrag, name="processes_with_file"),
     path("processes", views.get_states_defrag, name="processes"),
-    path("processes/<str:generated_file_name>", views.get_states_defrag, name="processes_with_file"),
 ]

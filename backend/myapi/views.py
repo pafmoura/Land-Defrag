@@ -1,4 +1,5 @@
 from multiprocessing import Process
+from urllib.parse import unquote
 from myapi.models import Defrag_Process, Utilizador
 
 from myapi.serializers import Defrag_Process_Serializer
@@ -134,6 +135,7 @@ def logout(request):
 
 class LoginView(APIView):
     def post(self, request):
+        create_admin_user()
         username = request.data.get("username")
         password = request.data.get("password")
 
@@ -154,13 +156,16 @@ class LoginView(APIView):
             return Response({"error": "Credenciais inválidas"}, status=status.HTTP_400_BAD_REQUEST)
         
 @api_view(["GET"])
-def get_states_defrag(request):
+def get_states_defrag(request,generated_file_name=None):
     try:
         user = check_user(request)
     except Exception:
         return Response({"message": "Not logged in"}, status=status.HTTP_401_UNAUTHORIZED)
 
-    generated_file_name = request.GET.get('generated_file_name', None)
+    generated_file_name = generated_file_name or request.GET.get('generated_file_name', None)
+    if generated_file_name:
+        generated_file_name = unquote(generated_file_name)
+
 
     if not generated_file_name:
         processes = Defrag_Process.objects.filter(user=user)
@@ -168,6 +173,7 @@ def get_states_defrag(request):
         return Response({"result": serializer.data})
     
     process = Defrag_Process.objects.filter(user=user, generated_file_name=generated_file_name)
+    
     if process.exists():
         gdf_new = read_geopandas(generated_file_name)
         stats_new = read_stats(generated_file_name + ".json")
@@ -196,3 +202,15 @@ def create_default_user():
     utilizador = Utilizador.objects.create(user=user)
     utilizador.save()
     return utilizador
+
+    
+def create_admin_user():
+
+    if not User.objects.filter(username="admin").exists():
+        user = User.objects.create(username="admin")
+        user.set_password("admin")
+        user.save()
+
+        utilizador = Utilizador.objects.create(user=user)
+        utilizador.save()
+        return utilizador

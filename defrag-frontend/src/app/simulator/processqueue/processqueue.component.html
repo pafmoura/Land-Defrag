@@ -1,0 +1,126 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processos de Desfragmentação</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+<link href="
+https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css
+
+
+
+" rel="stylesheet"></head>
+<body class="bg-gray-50  ">
+
+
+  
+    <header class="bg-gray-200 shadow-sm p-4">
+        <div class="container mx-auto  flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="assets/utils/logo.png" alt="ISCTE Logo" class="h-8">
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="p-2 rounded-full bg-white hover:bg-gray-100">
+                    <svg class="w-6 h-6 fill-current text-[#719460]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+                <button class="p-2 rounded-full bg-white hover:bg-gray-100" [routerLink]="'/results/map'">
+                    <svg class="w-6 h-6 fill-current text-[#719460]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-16 pt-8 ">
+        <h1 class="text-3xl font-bold mb-8">Processos de Desfragmentação</h1>
+
+        <div class="flex gap-52">
+            <div class="flex-1 max-w-lg relative ">
+                <div class="bg-[#719460] text-white rounded-xl p-12 pb-16 relative z-10 shadow-xl">
+                    <div class="flex gap-4 border-b border-white pb-4">
+                        <div class="flex-1">
+                            <p class="text-sm text-[#C6DCFC]">Número de Processos</p>
+                            <p class="text-2xl text-white font-bold">{{numberOfProcesses}}</p>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm text-[#C6DCFC]">Processos Completos</p>
+                            <p class="text-2xl font-bold">{{processesCompleted}}</p>
+                        </div>
+                    </div>
+                 
+                    <div class="absolute -bottom-44 left-1/2 -translate-x-1/2 w-64 h-64 overflow-hidden border-white drop-shadow-2xl z-10">
+                        <img src="https://www.onxmaps.com/wp-content/uploads/sites/15/2022/02/BCTEST-CROP-5.png" alt="Map Preview" class="w-full h-full object-cover">
+                    </div>
+                </div>
+                
+                
+                <div class="bg-[#719460] text-white p-6 rounded-lg shadow-lg mb-6 mt-48">
+                    <h2 class="font-bold text-xl mb-4">Filtros</h2>
+                    <div class="flex justify-center space-x-6">
+                        <div class="flex flex-col">
+                            <label for="algorithmFilter" class="block text-sm font-medium text-gray-200 mb-2">
+                                Algoritmo
+                            </label>
+                            <select id="algorithmFilter" 
+                                    class="bg-white text-gray-700 rounded-md border-2 border-gray-300 focus:ring-[#4e6f30] focus:border-[#4e6f30] shadow-sm p-2"
+                                    [(ngModel)]="filters.algoritmo" 
+                                    (change)="applyFilters()">
+                                <option value="">Todos</option>
+                                <option *ngFor="let algoritmo of uniqueAlgorithms" [value]="algoritmo">
+                                    {{ algoritmo }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="statusFilter" class="block text-sm font-medium text-gray-200 mb-2">
+                                Status
+                            </label>
+                            <select id="statusFilter" 
+        class="bg-white text-gray-700 rounded-md border-2 border-gray-300 focus:ring-[#4e6f30] focus:border-[#4e6f30] shadow-sm p-2"
+        [(ngModel)]="filters.is_completed" 
+        (change)="applyFilters()">
+    <option value="">Todos</option>
+    <option [value]="true">Concluídos</option>
+    <option [value]="false">Em Progresso</option>
+</select>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+
+            <div class="flex-[2] h-[70vh] max-h-[70vh] bg-white shadow-md rounded-lg hover:shadow-xl transition overflow-y-auto">
+                <div>
+            
+                    <div *ngFor="let process of filteredProcessQueue" class="border p-4 mb-2 rounded">
+                        <div class="flex justify-between items-center">
+                          <div>
+                            <p class="font-bold">Processo {{ process.id }}</p>
+                            <p>Algoritmo: {{ process.algoritmo }}</p>
+                            <p>Distribuição: {{ process.distribuicao }}</p>
+                            <p>Média: {{ process.avg }}</p>
+                            <p class="text-sm" [ngClass]="{'text-gray-500': !process.is_completed, 'text-green-600': process.is_completed}">
+                              {{ process.is_completed ? 'Concluído' : 'Em Progresso' }}
+                            </p>
+                          </div>
+                          <div>
+                            <button
+                              *ngIf="process.is_completed"
+                              class="bg-[#719460] text-white px-3 py-1 rounded"
+                              (click)="handleProcessComplete(process.generated_file_name)">
+                              Ver Resultado
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                                                              
+
+
+
+              </div>
+              

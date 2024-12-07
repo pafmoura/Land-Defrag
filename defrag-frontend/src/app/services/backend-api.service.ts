@@ -1,4 +1,4 @@
-import { HttpClient, HttpClientModule, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpClientModule, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable, throwError } from 'rxjs';
 
@@ -26,7 +26,12 @@ export class BackendApiService {
   }
 
 
-  
+    private getAuthHeaders(): HttpHeaders {
+      const token = localStorage.getItem('authToken');
+      return new HttpHeaders({
+        Authorization: `Token ${token}`,
+      });
+    }
 
   simulate(data: { file_name: string; distribuition_name: string; owners_average_land: number, gdf_file : any }): Observable<any> {
     const formData = new FormData();
@@ -37,7 +42,7 @@ export class BackendApiService {
       formData.append('gdf_file', data.gdf_file);
     }
 
-    return this.http.post(`${this.baseUrl}/simulate`, formData).pipe(
+    return this.http.post(`${this.baseUrl}/simulate`, formData,{ headers: this.getAuthHeaders() }).pipe(
       catchError(this.handleError)
     );
   }
@@ -61,8 +66,38 @@ export class BackendApiService {
     const formData = new FormData();
     formData.append('algorithm_name', data.algorithm_name);
     formData.append('generated_file_name', data.generated_file_name);
-    return this.http.post<any>(`${this.baseUrl}/defrag`, formData);
+    return this.http.post<any>(`${this.baseUrl}/defrag`, formData,{ headers: this.getAuthHeaders() });
   }
+
+
+  getStatesDefrag(generatedFileName?: string): Observable<any> {
+    let params = new HttpParams();
+    if (generatedFileName) {
+      params = params.append('generated_file_name', generatedFileName);
+    }
+  
+    if (!generatedFileName) {
+      console.log('getStatesDefrag');
+      return this.http.get<any>(`${this.baseUrl}/processes`, {
+        headers: this.getAuthHeaders(),
+        params: params,
+      }).pipe(
+        catchError(this.handleError)
+      );
+    }
+    else{
+      return this.http.get<any>(`${this.baseUrl}/processes/`+generatedFileName, {
+        headers: this.getAuthHeaders(),
+        params: params,
+      }).pipe(
+        catchError(this.handleError)
+      );
+
+    }
+    
+  }
+
+  
 
 
 

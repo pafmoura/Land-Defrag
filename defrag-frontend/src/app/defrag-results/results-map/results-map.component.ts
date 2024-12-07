@@ -43,7 +43,7 @@ export class ResultsMapComponent implements OnInit {
   };
 
   ngOnInit() {
-    const storedData = this.storageService.getItem<any>(this.storageKey);
+    const storedData = this.storageService.getItem<any>(this.storageKey)
 
     if (storedData) {
       console.log('Dados carregados do Storage:', storedData);

@@ -10,6 +10,7 @@ import proj4 from 'proj4';
 import { LeafletModule } from '@bluehalo/ngx-leaflet';
 import { FormsModule } from '@angular/forms';
 import { GeoJsonUtilsService } from '../../services/geo-json-utils.service';
+import { StorageService } from '../../services/storage-service.service';
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, BarController); 
 
@@ -28,7 +29,7 @@ export class StatisticsModalComponent implements OnInit {
   resultsData: any = null;
   initialSimulation: any = null;
 
-  constructor(private statisticsService: StatisticsService, private backendApiService : BackendApiService, private geoJsonUtilsService: GeoJsonUtilsService,) {}
+  constructor(private statisticsService: StatisticsService, private storageService: StorageService, private backendApiService : BackendApiService, private geoJsonUtilsService: GeoJsonUtilsService,) {}
   ownersList: string[] = [];
   filteredOwner: string | null = null;
   filteredLayer: Leaflet.FeatureGroup = new Leaflet.FeatureGroup();
@@ -37,7 +38,13 @@ export class StatisticsModalComponent implements OnInit {
 
   ngOnInit() {
     this.resultsData = this.backendApiService.defrag_result;
-    this.initialSimulation = this.backendApiService.initial_simulation;
+    if(this.backendApiService.initial_simulation){
+      this.initialSimulation = this.backendApiService.initial_simulation;
+    }else{  
+      this.initialSimulation = this.storageService.getItem<any>("initial_simulation");
+
+    }
+
 
     console.log('Results Data:', this.resultsData);
     console.log('Initial Simulation:', this.initialSimulation);

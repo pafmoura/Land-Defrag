@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { GeoJsonUtilsService } from '../../services/geo-json-utils.service';
 import { StorageService } from '../../services/storage-service.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-simulatorsetup',
@@ -44,10 +45,23 @@ export class SimulatorsetupComponent implements OnInit {
     private backendApiService: BackendApiService,
     private router: Router,
     private geoJsonUtils: GeoJsonUtilsService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private authService: AuthService
   ) {}
 
-  ngOnInit() {}
+  username: string = '';
+  ngOnInit() {
+
+    this.username = localStorage.getItem('username') || '';
+
+
+
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
   progress = 0;
   
 selectedFile: any;
@@ -119,7 +133,6 @@ readFile() {
   initial_simulation: any = {};
 
   getLoadedLands() {
-    this.storageService.deleteAll();
     this.isLoading = true;
 
     this.backendApiService.simulate({
@@ -149,24 +162,16 @@ readFile() {
   }
 
   runDefrag() {
-    console.log('this.algorithm', this.algorithm);
-    this.isLoading = true;
-
+    console.log('Iniciando defrag com algoritmo:', this.algorithm);
+  
     this.backendApiService.defrag({
       algorithm_name: this.algorithm,
       generated_file_name: this.backendApiService.generated_file_name
     }).subscribe({
-      next: (response) => {
-        console.log(response);
-        this.backendApiService.defrag_result = response;
-      },
-      complete: () => {
-        this.isLoading = false;
-        this.router.navigate(['/results/map']);
-      },
       error: (error) => {
-        console.error('Erro ao executar defrag:', error);
+        console.error('Erro ao iniciar defrag:', error);
       }
     });
-  }
-}
+  
+    this.router.navigate(['/processqueue']);
+  }}
