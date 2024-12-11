@@ -285,7 +285,7 @@ class Defrag_Generator:
             if i % 500 == 0:
                 print("Locked:", num_locked)
             i += 1
-        return gdf, tk, current_list
+        return gdf, tk, current_list, True
 
     def create_and_defrag(cls, algorithm_name, gdf):
         match algorithm_name:

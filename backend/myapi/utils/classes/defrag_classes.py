@@ -309,4 +309,4 @@ class Defrag_Generator:
             if i % 500 == 0:
                 print("Locked:", num_locked)
             i += 1
-        return gdf, tk, owners
+        return gdf, tk, owners, True

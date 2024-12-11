@@ -157,7 +157,7 @@ class MutationalRedistribute(Redistribute):
     @classmethod
     def optimize(cls, gdf, tracker=None, max_iters=20, alpha=0.6, beta=0.4, temp=200, cooling_rate=0.995, patience=50, add_pivots=None, reset=False, limit=-1):
         initial_areas = cls.calculate_initial_areas(gdf)
-        gdf, tracker, _ = cls.redistribute(gdf, tracker=tracker)
+        gdf, tracker, _, _ = cls.redistribute(gdf, tracker=tracker)
 
         best_gdf = gdf.copy()
         best_cost = cls.calculate_cost(best_gdf, initial_areas, alpha, beta)
@@ -218,4 +218,4 @@ class MutationalRedistribute(Redistribute):
         print(f"Erro de ag. final: {Defrag_Generator.calculate_aggregation_error(best_gdf):.4f}")
         print(f"Máxima diff de área final: {max(abs(initial_areas[owner] - best_gdf.loc[best_gdf['OWNER_ID'] == owner, 'Shape_Area'].sum()) for owner in initial_areas):.4f}")
 
-        return best_gdf, tracker, initial_areas
+        return best_gdf, tracker, initial_areas, False

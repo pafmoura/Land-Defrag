@@ -220,4 +220,4 @@ class Redistribute:
         print(f"Diferença máxima final = {final_max_difference}")
         
 
-        return gdf, tracker, initial_areas
+        return gdf, tracker, initial_areas, False
