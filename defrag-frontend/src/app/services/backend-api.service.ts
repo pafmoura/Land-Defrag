@@ -1,6 +1,7 @@
 import { HttpClient, HttpClientModule, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable, throwError } from 'rxjs';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +16,7 @@ export class BackendApiService {
   public initial_simulation: any = null;
   public defrag_result: any = null;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private authService : AuthService) { }
 
 
   
@@ -27,7 +28,7 @@ export class BackendApiService {
 
 
     private getAuthHeaders(): HttpHeaders {
-      const token = localStorage.getItem('authToken');
+      const token = this.authService.getToken();
       return new HttpHeaders({
         Authorization: `Token ${token}`,
       });

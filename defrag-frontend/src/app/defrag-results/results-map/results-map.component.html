@@ -47,6 +47,11 @@
         Algoritmo executado com sucesso!
       </h4>
       <p class="text-sm text-gray-500 leading-relaxed mt-4">
+        <b>Erro de Agregação : {{ aggregationerror | number:'1.3-3' }}</b><br>
+        <b>Diferença Média de Áreas : {{ rmse | number:'1.3-3' }}</b>
+        
+      </p>  
+      <p class="text-sm text-gray-500 leading-relaxed mt-4">
         O processamento foi concluído. Será agora possível consultar o mapa com os terrenos trocados, bem como aceder e exportar o relatório detalhado de trocas.
       </p>
     </div>

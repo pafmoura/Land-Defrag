@@ -25,6 +25,9 @@ export class ResultsMapComponent implements OnInit {
   private storageKey = 'results_data';
   isWelcomeModalOpen = true;
 
+  aggregationerror = 0;
+  rmse = 0;
+
   constructor(
     private backendApiService: BackendApiService,
     private storageService: StorageService,
@@ -48,9 +51,14 @@ export class ResultsMapComponent implements OnInit {
     if (storedData) {
       console.log('Dados carregados do Storage:', storedData);
       this.results_data = storedData;
+      this.aggregationerror = this.results_data.stats.aggregation_error;
+      this.rmse = this.results_data.stats.error_diff;
       this.geoJsonUtils.addPolygonsFromGeoJSON(this.mapInstance, this.polygonsLayer, this.results_data.gdf);
     } else {
       this.results_data = this.backendApiService.defrag_result;
+      
+      this.aggregationerror = this.results_data.stats.aggregation_error;
+      this.rmse = this.results_data.stats.error_diff;
       if (this.results_data) {
         this.storageService.setItem(this.storageKey, this.results_data); 
         this.geoJsonUtils.addPolygonsFromGeoJSON(this.mapInstance, this.polygonsLayer, this.results_data.gdf);
