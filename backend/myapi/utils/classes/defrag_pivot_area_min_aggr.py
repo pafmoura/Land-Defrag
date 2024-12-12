@@ -443,4 +443,4 @@ class Defrag_Generator_Min_Aggr:
                 best_gdf_all = best_gdf.copy()
                 best_error_all = best_error
                 
-        return best_gdf_all, tk, owners
+        return best_gdf_all, tk, owners, True

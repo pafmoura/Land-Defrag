@@ -65,7 +65,7 @@ class Stats:
         if is_using_class_Onwer:
             error_diff, diff_areas = Stats.error_diff_with_Owner_class(gdf, initial_areas)
         else:
-            error_diff, diff_areas = Stats.error_diff_with_Owner_class(gdf, initial_areas)
+            error_diff, diff_areas = Stats.error_diff_with_redistribution(gdf, initial_areas)
 
         aggregation_error = Stats.calculate_aggregation_error(gdf)
 
@@ -82,11 +82,17 @@ class Stats:
         elif isinstance(obj, list):  # Process lists
             return [cls.convert_for_json(item) for item in obj]
         elif isinstance(obj, dict):  # Process dictionaries
-            return {key: cls.convert_for_json(value) for key, value in obj.items()}
+            d = {}
+            for key, value in obj.items():
+                if isinstance(key, np.integer):
+                    key = int(key)
+                d[key] = cls.convert_for_json(value)
+            return d
         else:
             return obj  # Return as is if already serializable
     @classmethod
     def save(cls, data, file_path):
         data = cls.convert_for_json(data)
+        print(data)
         with open(file_path, "w") as f:
             json.dump(data, f, indent=4)

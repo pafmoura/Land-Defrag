@@ -24,10 +24,10 @@ def preprocess_geopandas(gdf, name, owners_average_land):
 
 
 def defrag_save(gdf, defrag_function, defrag_file_name, new_defrag):
-    gdf_new, tk, owners =  defrag_function(gdf=gdf)
+    gdf_new, tk, owners, uses_owners =  defrag_function(gdf=gdf)
     save_file(gdf_new, defrag_file_name)
 
-    stats = Stats.get_json(gdf, owners, is_using_class_Onwer=True)
+    stats = Stats.get_json(gdf, owners, is_using_class_Onwer=uses_owners)
     fs = FileSystemStorage()
     file_path = fs.path(defrag_file_name)
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
