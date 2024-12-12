@@ -7,4 +7,5 @@ class Defrag_Process_Serializer(serializers.ModelSerializer):
         fields = (
             "is_completed",
             "generated_file_name",
+            "initial_simulation",
         )

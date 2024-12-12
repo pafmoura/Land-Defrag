@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { BackendApiService } from '../../services/backend-api.service';
 import { FormsModule } from '@angular/forms';
 import { StorageService } from '../../services/storage-service.service';
+import { switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-processqueue',
@@ -82,6 +83,7 @@ export class ProcessqueueComponent implements OnInit {
   getStatesDefrag(): void {
     this.backendApiService.getStatesDefrag().subscribe({
       next: (response: any) => {
+        console.log('Estados recebidos:', response);
         if (response && Array.isArray(response.result)) {
           this.processQueue = response.result.map((item: any, index: number) => {
             const details = this.extractDetails(item.generated_file_name);
@@ -110,22 +112,28 @@ export class ProcessqueueComponent implements OnInit {
     
 
   
-  handleProcessComplete(generated_file_name: string): void {
-    const encodedFileName = encodeURIComponent(generated_file_name);  
-    this.backendApiService.getStatesDefrag(encodedFileName).subscribe({
-      next: (response) => {
-        
+  handleProcessComplete(generated_file_name: string,old_file_name:string): void {
+    const encodedFileName = encodeURIComponent(generated_file_name);
+  
+    this.backendApiService.getStatesDefrag(encodedFileName).pipe(
+      tap((response) => {
         console.log('Arquivo recebido:', response);
         this.backendApiService.defrag_result = response;
         this.storageService.setItem('results_data', response);
-
-      },
-      complete: () => {
-        this.router.navigate(['/results/map']); 
+      }),
+      switchMap(() => 
+        this.backendApiService.getSimulationByFilename(old_file_name)
+      )
+    ).subscribe({
+      next: (simulationResponse) => {
+        console.log('Simulação recebida:', simulationResponse);
+        this.storageService.setItem('initial_simulation', simulationResponse.gdf);
+        this.router.navigate(['/results/map']);
       },
       error: (error) => {
-        console.error('Erro ao processar o arquivo:', error);
-      },
+        console.error('Erro no processo:', error);
+      }
     });
   }
+  
   }

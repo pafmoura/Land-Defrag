@@ -42,6 +42,9 @@ export class TradesReportComponent implements OnInit {
     const initialData = this.storageService.getItem<any>(this.initialKey);
     const resultsData = this.storageService.getItem<any>(this.resultsKey);
 
+    console.log("initial",initialData);
+    console.log("results",resultsData);
+
     if (initialData && resultsData) {
       this.generateTradesData(initialData, resultsData);
     } else {
@@ -67,6 +70,7 @@ export class TradesReportComponent implements OnInit {
       oldOwner: this.findOldOwner(initialData, feature.properties?.PAR_ID),
       newOwner: feature.properties?.OWNER_ID || '0',
     }));
+    console.log("tradesData",this.tradesData);
   }
 
   activeSort: string = '';

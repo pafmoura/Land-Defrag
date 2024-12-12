@@ -112,7 +112,7 @@ https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css
                             <button
                               *ngIf="process.is_completed"
                               class="bg-[#719460] text-white px-3 py-1 rounded"
-                              (click)="handleProcessComplete(process.generated_file_name)">
+                              (click)="handleProcessComplete(process.generated_file_name,process.initial_simulation)">
                               Ver Resultado
                             </button>
                           </div>

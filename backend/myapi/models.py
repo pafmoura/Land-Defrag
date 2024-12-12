@@ -9,3 +9,4 @@ class Defrag_Process(models.Model):
     user = models.ForeignKey(Utilizador, on_delete=models.CASCADE)
     generated_file_name = models.CharField(max_length=200)
     is_completed = models.BooleanField(default=False)
+    initial_simulation = models.CharField(max_length=200, null=True)

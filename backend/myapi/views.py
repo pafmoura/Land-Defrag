@@ -103,7 +103,8 @@ def defrag(request):
         new_defrag = Defrag_Process.objects.create(
               user=user,
               generated_file_name=defrag_file_name,
-              is_completed=False)
+              is_completed=False,
+              initial_simulation=generated_file_name)
 
         new_defrag.save()
 
@@ -155,6 +156,16 @@ class LoginView(APIView):
         else:
             return Response({"error": "Credenciais inválidas"}, status=status.HTTP_400_BAD_REQUEST)
         
+@api_view(["GET"])
+def get_simulation_by_filename(request, generated_file_name):
+    try:
+        user = check_user(request)
+    except Exception:
+        return Response({"message": "Not logged in"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    gdf = read_geopandas(generated_file_name)
+    return Response({"gdf": gdf.__geo_interface__}, status=status.HTTP_200_OK)
+
 @api_view(["GET"])
 def get_states_defrag(request,generated_file_name=None):
     try:

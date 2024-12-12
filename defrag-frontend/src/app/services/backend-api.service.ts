@@ -97,6 +97,11 @@ export class BackendApiService {
     
   }
 
+  getSimulationByFilename(filename: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/get_simulation_by_filename/${filename}/`, { headers: this.getAuthHeaders() });
+  }
+  
+
   
 
 
