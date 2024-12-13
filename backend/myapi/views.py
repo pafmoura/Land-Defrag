@@ -1,8 +1,10 @@
+import json
 from multiprocessing import Process
 from urllib.parse import unquote
 from myapi.models import Defrag_Process, Utilizador
 
 from myapi.serializers import Defrag_Process_Serializer
+from django.utils.timezone import now
 
 from myapi.utils.classes.defrag_pivot_area_min_aggr import Defrag_Generator_Min_Aggr
 from myapi.utils.classes.redistribution_defrag import Redistribute
@@ -22,6 +24,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 
+import time
+from django.http import HttpResponse, StreamingHttpResponse
+from myapi.models import Defrag_Process
+from django.db.models import Q
 
 from rest_framework.response import Response
 from rest_framework import status
@@ -225,3 +231,42 @@ def create_admin_user():
         utilizador = Utilizador.objects.create(user=user)
         utilizador.save()
         return utilizador
+
+
+
+
+@api_view(['GET'])
+def sse_processqueue(request):
+    def event_stream(user):
+        last_seen = time.time()  
+        last_processes = None  
+        try:
+            while True:
+                processes = list(
+                    Defrag_Process.objects.filter(user=user).values(
+                        "id", "is_completed", "generated_file_name", "initial_simulation"
+                    )
+                )
+                
+                if processes != last_processes:
+                    yield f"data: {json.dumps(processes)}\n\n"
+                    last_processes = processes 
+                
+                time.sleep(1)  
+        except GeneratorExit:
+            return
+
+    try:
+        user = check_user(request)  
+    except Exception:
+        return Response({"message": "Not logged in"}, status=status.HTTP_401_UNAUTHORIZED)
+
+ 
+    response = StreamingHttpResponse(
+        event_stream(user),
+        content_type='text/event-stream',
+    )
+    response['Cache-Control'] = 'no-cache'
+    response['X-Accel-Buffering'] = 'no'  
+    return response
+

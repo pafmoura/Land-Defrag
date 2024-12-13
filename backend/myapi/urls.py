@@ -10,4 +10,6 @@ urlpatterns = [
     path("processes/<path:generated_file_name>", views.get_states_defrag, name="processes_with_file"),
     path("processes", views.get_states_defrag, name="processes"),
     path("get_simulation_by_filename/<path:generated_file_name>/", views.get_simulation_by_filename, name="get_simulation_by_filename"),
+    path('sse', views.sse_processqueue, name='sse_processqueue'),
+
 ]
