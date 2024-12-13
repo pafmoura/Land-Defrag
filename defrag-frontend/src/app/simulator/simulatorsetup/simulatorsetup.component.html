@@ -58,10 +58,7 @@ https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css
                             <p class="text-2xl font-bold">{{ totalArea }}</p>
                         </div>
                     </div>
-                    <div class="mt-4">
-                        <p class="text-sm text-[#C6DCFC]">Valor Estimado</p>
-                        <p class="text-2xl font-bold">€300,290.00</p>
-                    </div>
+                   
                     <div class="absolute -bottom-44 left-1/2 -translate-x-1/2 w-64 h-64 overflow-hidden border-white drop-shadow-2xl z-10">
                         <img src="https://www.onxmaps.com/wp-content/uploads/sites/15/2022/02/BCTEST-CROP-5.png" alt="Map Preview" class="w-full h-full object-cover">
                     </div>
@@ -72,18 +69,24 @@ https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css
                
 
                 <div class="bg-white border rounded-2xl h-[25%] w-2/3 shadow-sm hover:shadow-lg transition duration-100 mt-44 mb-12 pt-6 max-w-sm mx-auto flex flex-col items-center justify-center relative group">
-                  <i class="fa-solid text-[#719460] fa-upload ml-2"></i>
-
-                  <div class="flex items-center justify-center mb-6">
-                    <h2 class="text-xl font-bold ml-2">Carregar Ficheiro</h2>
-                  </div>
-                
-                  <label class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 hover:bg-opacity-100 cursor-pointer opacity-0 group-hover:opacity-100 transition duration-300 rounded-2xl">
-                    <input type="file" (change)="onFileChange($event)" class="hidden" />
-                    <span class="text-[#719460] font-semibold">Clique para carregar</span>
+                  <div *ngIf="!selectedFile; else fileLoaded" class="flex flex-col items-center">
                     <i class="fa-solid text-[#719460] fa-upload ml-2"></i>
-                  </label>
+                    <h2 class="text-xl font-bold ml-2">Carregar Ficheiro</h2>
+                    <label class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 hover:bg-opacity-100 cursor-pointer opacity-0 group-hover:opacity-100 transition duration-300 rounded-2xl">
+                      <input type="file" (change)="onFileChange($event)" class="hidden" />
+                      <span class="text-[#719460] font-semibold">Clique para carregar</span>
+                      <i class="fa-solid text-[#719460] fa-upload ml-2"></i>
+                    </label>
+                  </div>
+                  <ng-template #fileLoaded>
+                    <div class="flex flex-col items-center">
+                      <i class="fa-solid text-[#719460] fa-check-circle ml-2"></i>
+                      <h2 class="text-xl font-bold text-[#719460] ml-2">{{ selectedFile?.name }}</h2>
+                      <label class="mt-4 cursor-pointer text-[#719460] underline" (click)="resetFile()">Mudar arquivo</label>
+                    </div>
+                  </ng-template>
                 </div>
+                
             </div>
 
             

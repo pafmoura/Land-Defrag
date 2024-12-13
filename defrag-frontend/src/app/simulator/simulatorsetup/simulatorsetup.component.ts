@@ -68,15 +68,20 @@ selectedFile: any;
 
 onFileChange(event: any) {
   const fileList: FileList = event.target.files;
-
   if (fileList.length > 0) {
     this.selectedFile = fileList[0]; 
-    console.log('Selected file:', this.selectedFile);
+    console.log('Arquivo selecionado:', this.selectedFile);
     this.readFile();
   } else {
-    console.error('No file selected');
+    console.error('Nenhum arquivo selecionado');
   }
 }
+
+resetFile() {
+  this.selectedFile = null;
+  this.gdf_file = null;
+}
+
 
 gdf_file : any = null;
 readFile() {

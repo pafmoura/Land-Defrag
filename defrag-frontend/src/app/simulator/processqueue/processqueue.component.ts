@@ -5,6 +5,7 @@ import { BackendApiService } from '../../services/backend-api.service';
 import { FormsModule } from '@angular/forms';
 import { StorageService } from '../../services/storage-service.service';
 import { switchMap, tap } from 'rxjs';
+import { interval, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-processqueue',
@@ -14,11 +15,19 @@ import { switchMap, tap } from 'rxjs';
   styleUrl: './processqueue.component.css'
 })
 export class ProcessqueueComponent implements OnInit {
+  private updateSubscription: Subscription | null = null;
 
   constructor(private router: Router, private backendApiService : BackendApiService, private storageService : StorageService ) {}
   ngOnInit(): void {
     this.getStatesDefrag();
-    
+    this.updateSubscription = interval(5000).subscribe(() => {
+      this.getStatesDefrag();
+    });
+
+  }
+
+  ngOnDestroy(): void {
+    this.updateSubscription?.unsubscribe();
   }
 
   filters = {
