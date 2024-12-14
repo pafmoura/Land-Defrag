@@ -3,22 +3,19 @@ import numpy as np
 import pandas as pd
 from myapi.utils.classes.redistribution_defrag import Redistribute
 from myapi.utils.classes.defrag_classes import Defrag_Generator
+from myapi.utils.classes.stats import Stats
 
 class MutationalRedistribute(Redistribute):
     @classmethod
     def calculate_cost(cls, gdf, initial_areas, alpha=0.6, beta=0.4):
-        # Calcula o custo (agg error + area diff)
         aggregation_error = Defrag_Generator.calculate_aggregation_error(gdf)
         
-        total_area_diff = sum(
-            abs(initial_areas[owner] - gdf.loc[gdf["OWNER_ID"] == owner, "Shape_Area"].sum())
-            for owner in initial_areas
-        )
-        max_area = sum(initial_areas.values())
-        normalized_area_diff = total_area_diff / max_area 
+        rmse, _ = Stats.error_diff_with_redistribution(gdf, initial_areas)
         
-        return alpha * aggregation_error + beta * normalized_area_diff
-
+        max_area = sum(initial_areas.values())  
+        normalized_rmse = rmse / max_area if max_area > 0 else 0
+        
+        return alpha * aggregation_error + beta * normalized_rmse
 
 
     @classmethod
@@ -54,7 +51,7 @@ class MutationalRedistribute(Redistribute):
                 
                 # escolhe a melhor
                 best_candidate = min(candidates, key=lambda x: x[1])
-                if best_candidate[1] <= current_cost * 1.05:  # aumento custo... previnir minimo local (acho?)
+                if best_candidate[1] <= current_cost * 1.05:  # aumento custo... previnir minimo local 
                     new_states.append(best_candidate)
             
             if new_states:
@@ -155,7 +152,7 @@ class MutationalRedistribute(Redistribute):
             gdf.loc[gdf["OBJECTID"] == neighbor_id, "OWNER_ID"] = selected_terrain["OWNER_ID"]
 
     @classmethod
-    def optimize(cls, gdf, tracker=None, max_iters=20, alpha=0.6, beta=0.4, temp=200, cooling_rate=0.995, patience=50, add_pivots=None, reset=False, limit=-1):
+    def optimize(cls, gdf, tracker=None, max_iters=100, alpha=0.6, beta=0.4, temp=200, cooling_rate=0.995, patience=20, add_pivots=None, reset=False, limit=-1):
         initial_areas = cls.calculate_initial_areas(gdf)
         gdf, tracker, _, _ = cls.redistribute(gdf, tracker=tracker)
 
@@ -164,9 +161,11 @@ class MutationalRedistribute(Redistribute):
         
         current_gdf = gdf.copy()
         current_cost = best_cost
+
+        explored_states = [(current_gdf.copy(), current_cost)]  #  guardar soluções exploradas
+        max_explored_states = 100  #  máximo de estados armazenados
         
         no_improvement = 0
-        patience = 50
         reset_counter = 0
         max_resets = 3
         
@@ -183,6 +182,11 @@ class MutationalRedistribute(Redistribute):
             if delta < 0 or (random.random() < acceptance_prob and delta < current_cost * 0.1):  # limita custo máximo
                 current_gdf = mutated_gdf.copy()
                 current_cost = new_cost
+
+                # nova soluçao armazenada
+                explored_states.append((current_gdf.copy(), current_cost))
+                if len(explored_states) > max_explored_states:  # tamanho máximo da lista
+                    explored_states.pop(0)
                 
                 if new_cost < best_cost:
                     best_gdf = current_gdf.copy()
@@ -193,16 +197,14 @@ class MutationalRedistribute(Redistribute):
             else:
                 no_improvement += 1
             
-            # SE TIVER ESTAGNADO
-            #Já não vai fazer falta... só guardo a melhor no atual... mas rever opção
             if no_improvement >= patience:
                 if reset_counter < max_resets:
                     print(f"Reset {reset_counter + 1} Estagnado!!!!!!!")
-                    current_gdf = best_gdf.copy()
-                    current_cost = best_cost
-                    temp = 100.0  # temperatura resetted
+                    # escolhe uma solução aleatória para reiniciar
+                    current_gdf, current_cost = random.choice(explored_states)
+                    temp = 100.0  
                     no_improvement = 0
-                    reset_counter += 100
+                    reset_counter += 1
                 else:
                     print("Náx resets")
                     break
@@ -211,11 +213,10 @@ class MutationalRedistribute(Redistribute):
             temp = max(0.01, temp * cooling_rate)
             
             print(f"Iteração {i}: Custo atual = {current_cost:.4f}, "
-                      f"Melhor custo = {best_cost:.4f}, "
-                      f"Temp = {temp:.4f}")
+                    f"Melhor custo = {best_cost:.4f}, "
+                    f"Temp = {temp:.4f}")
 
         print(f"Custo final: {best_cost:.4f}")
         print(f"Erro de ag. final: {Defrag_Generator.calculate_aggregation_error(best_gdf):.4f}")
-        print(f"Máxima diff de área final: {max(abs(initial_areas[owner] - best_gdf.loc[best_gdf['OWNER_ID'] == owner, 'Shape_Area'].sum()) for owner in initial_areas):.4f}")
-
+        print(f"Erro de redistribuição final: {Stats.error_diff_with_redistribution(best_gdf, initial_areas)[0]:.4f}")
         return best_gdf, tracker, initial_areas, False

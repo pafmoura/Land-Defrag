@@ -12,7 +12,7 @@ from myapi.utils.classes.defrag_classes import Defrag_Generator
 from myapi.utils.classes.stats import Stats
 from myapi.utils.geopandas_wrapper import check_geopackage_status, convert_types, read_geopandas, read_stats, save_file
 from myapi.utils.utils import defrag_save, preprocess_geopandas
-from myapi.utils.classes.beam_search_algorithm import MutationalRedistribute
+from myapi.utils.classes.redistribution_mutations import MutationalRedistribute
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
