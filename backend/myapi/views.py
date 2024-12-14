@@ -39,9 +39,9 @@ def test_connection(_request):
     return Response(status=status.HTTP_200_OK, data={"": "Alive"})
 
 ALGORITHMS = {
-    "Menor Indice de Aggr": Defrag_Generator_Min_Aggr.defrag,
-    "pedro": Redistribute.redistribute,  
-    "beamsearch": MutationalRedistribute.optimize,
+    "Desfragmentaçao por pivôs": Defrag_Generator_Min_Aggr.defrag,
+    "Redistribuição": Redistribute.redistribute,  
+    "Redistribuição com Mutational Beam Annealing": MutationalRedistribute.optimize,
 }
 
 
