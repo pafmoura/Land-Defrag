@@ -66,8 +66,8 @@ https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css
                                 Algoritmo
                             </label>
                             <select id="algorithmFilter" 
-                                    class="bg-white text-gray-700 rounded-md border-2 border-gray-300 focus:ring-[#4e6f30] focus:border-[#4e6f30] shadow-sm p-2"
-                                    [(ngModel)]="filters.algoritmo" 
+                            class="bg-white text-gray-700 rounded-md border-2 border-gray-300 focus:ring-[#4e6f30] focus:border-[#4e6f30] shadow-sm p-2 max-w-[200px] overflow-hidden truncate"
+                            [(ngModel)]="filters.algoritmo" 
                                     (change)="applyFilters()">
                                 <option value="">Todos</option>
                                 <option *ngFor="let algoritmo of uniqueAlgorithms" [value]="algoritmo">
