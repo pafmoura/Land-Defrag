@@ -224,5 +224,5 @@ class Redistribute:
         print(f"Diferença máxima final = {final_max_difference}")
         
         time_execution = time.time() - start_time
-        print(time_execution)
+        print(f"Time:{time_execution}")
         return gdf, tracker, initial_areas, False
