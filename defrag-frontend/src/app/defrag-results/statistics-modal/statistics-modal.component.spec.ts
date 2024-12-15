@@ -20,4 +20,12 @@ describe('StatisticsModalComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  describe('check if initial simulation exists', () => {
+    expect(component.initialSimulation).toBeTruthy();
+  });
+
+  //describe('should calculate owner areas', () => {
+  //  expect(component.calculateOwnerAreas(component.initialSimulation)).toBeTruthy();
+  //});
 });

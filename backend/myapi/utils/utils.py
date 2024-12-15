@@ -1,4 +1,5 @@
 import os
+import time
 from django.core.files.storage import FileSystemStorage
 from myapi.utils.classes.populate_classes import Population_Generator
 from myapi.utils.classes.stats import Stats
@@ -24,7 +25,10 @@ def preprocess_geopandas(gdf, name, owners_average_land):
 
 
 def defrag_save(gdf, defrag_function, defrag_file_name, new_defrag):
+    start_time = time.time()
     gdf_new, tk, owners, uses_owners =  defrag_function(gdf=gdf)
+    time_elapsed = time.time() - start_time
+    print("Elapsed time:", time_elapsed)
     save_file(gdf_new, defrag_file_name)
 
     stats = Stats.get_json(gdf, owners, is_using_class_Onwer=uses_owners)
