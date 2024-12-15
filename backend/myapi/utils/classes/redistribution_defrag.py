@@ -1,5 +1,5 @@
 
-
+import time 
 from myapi.utils.classes.defrag_pivot_area_min_aggr import Traker
 from myapi.utils.classes.stats import Stats
 
@@ -129,7 +129,7 @@ class Redistribute:
 
     @classmethod
     def redistribute(cls, gdf, tracker=None, limit=100, threshold=70000, **kwargs):
-    
+        start_time = time.time()
         if tracker is None:
             tracker = Traker()  
 
@@ -223,5 +223,6 @@ class Redistribute:
         print(f"Erro de agregação final = {final_agg_error}")
         print(f"Diferença máxima final = {final_max_difference}")
         
-
+        time_execution = time.time() - start_time
+        print(time_execution)
         return gdf, tracker, initial_areas, False
