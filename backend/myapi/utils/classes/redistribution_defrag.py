@@ -1,4 +1,8 @@
-from myapi.utils.classes.defrag_classes import Defrag_Generator, Traker
+
+
+from myapi.utils.classes.defrag_pivot_area_min_aggr import Traker
+from myapi.utils.classes.stats import Stats
+
 
 class Redistribute:
 
@@ -149,7 +153,7 @@ class Redistribute:
             for owner in initial_areas
         )
         print(f"Máxima diferença de área = {max_difference}")
-        aggregation_error = Defrag_Generator.calculate_aggregation_error(gdf)
+        aggregation_error = Stats.calculate_aggregation_error(gdf)
         print(f"Erro de agregação = {aggregation_error}")
         print(f"Terrenos por atibuir: {len(gdf.loc[gdf['OWNER_ID'].isnull()])}")
 
@@ -203,7 +207,7 @@ class Redistribute:
             initial_areas[owner] - gdf.loc[gdf["OWNER_ID"] == owner, "Shape_Area"].sum()
             for owner in initial_areas
         )
-        final_agg_error = Defrag_Generator.calculate_aggregation_error(gdf)
+        final_agg_error = Stats.calculate_aggregation_error(gdf)
         print(f"Erro de agregação final = {final_agg_error}")
         print(f"Diferença máxima final = {final_max_difference}")
         
