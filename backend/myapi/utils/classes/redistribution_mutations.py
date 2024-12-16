@@ -217,6 +217,6 @@ class MutationalRedistribute(Redistribute):
                     f"Temp = {temp:.4f}")
 
         print(f"Custo final: {best_cost:.4f}")
-        print(f"Erro de ag. final: {Defrag_Generator.calculate_aggregation_error(best_gdf):.4f}")
+        print(f"Erro de ag. final: {Stats.calculate_aggregation_error(best_gdf):.4f}")
         print(f"Erro de redistribuição final: {Stats.error_diff_with_redistribution(best_gdf, initial_areas)[0]:.4f}")
         return best_gdf, tracker, initial_areas, False

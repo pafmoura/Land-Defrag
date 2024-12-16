@@ -31,7 +31,7 @@ def defrag_save(gdf, defrag_function, defrag_file_name, new_defrag):
     print("Elapsed time:", time_elapsed)
     save_file(gdf_new, defrag_file_name)
 
-    stats = Stats.get_json(gdf, owners, is_using_class_Onwer=uses_owners)
+    stats = Stats.get_json(gdf_new, owners, is_using_class_Onwer=uses_owners)
     fs = FileSystemStorage()
     file_path = fs.path(defrag_file_name)
     os.makedirs(os.path.dirname(file_path), exist_ok=True)

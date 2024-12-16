@@ -101,13 +101,14 @@ export class StatisticsModalComponent implements OnInit {
   }
 
   private filterPolygonsByOwner(geoJsonData: any, owner: string | null): any {
+    
     if (!geoJsonData || !owner) {
-      console.warn('Dados do GeoJSON não fornecidos.');
       return geoJsonData; 
     }
 
+
     const filteredFeatures = geoJsonData.features.filter((feature: any) => {
-      return feature.properties?.OWNER_ID === Number(owner);
+      return feature.properties?.OWNER_ID == Number(owner);
     });
 
     return { ...geoJsonData, features: filteredFeatures };
@@ -154,6 +155,8 @@ export class StatisticsModalComponent implements OnInit {
   
     const filteredGeoJson = this.filterPolygonsByOwner(this.resultsData.gdf, this.filteredOwner);
   
+    console.log('Filtered GeoJSON:', filteredGeoJson);
+
     if (filteredGeoJson.features.length > 0) {
       this.geoJsonUtilsService.addPolygonsFromGeoJSON(
         this.mapInstance,
@@ -161,6 +164,8 @@ export class StatisticsModalComponent implements OnInit {
         filteredGeoJson
       );
     }
+
+
   
     // atualizar
     this.mapInstance.invalidateSize();
