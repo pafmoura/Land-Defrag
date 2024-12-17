@@ -13,7 +13,7 @@ import { HttpHeaders } from '@angular/common/http';
 @Component({
   selector: 'app-processqueue',
   standalone: true,
-  imports: [RouterModule, CommonModule, FormsModule],
+  imports: [RouterModule, CommonModule, FormsModule, RouterModule],
   templateUrl: './processqueue.component.html',
   styleUrl: './processqueue.component.css'
 })
